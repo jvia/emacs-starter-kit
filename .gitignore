@@ -21,14 +21,14 @@ elpa-to-submit/nxhtml/etc/schema/xhtml-loader.rnc~
 tramp
 
 ## exported files
-*el
+##*el
 starter-kit*html
 doc
 eshell/lastdir
 eshell/history
 
 ## ignore packages held in the src directory
-##src
+src
 
 ## org stuff
 .org-id-locations
