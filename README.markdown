@@ -31,7 +31,21 @@ screencast](http://peepcode.com/products/meet-emacs) helpful. The
 2. Move the directory containing this file to ~/.emacs.d
    (If you already have a directory at ~/.emacs.d move it out of the
    way and put this there instead.)
-3. Launch Emacs!
+3. Run `git submodule init`
+4. Run `git submodule update`
+5. Build org
+   
+   `cd src/org && make`
+
+6. Build magit
+
+   `cd src/magit && make`
+
+7. Build AucTex
+
+   `cd src/auctex && ./configure && make`
+
+8. Launch Emacs!
 
 If you find yourself missing some autoloads after an update (which
 should manifest itself as "void function: foobar" errors) try M-x

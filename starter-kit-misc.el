@@ -47,7 +47,7 @@
 ;; (setq browse-url-browser-function 'browse-default-epiphany)
 ;; (setq browse-url-browser-function 'browse-default-w3m)
  (setq browse-url-browser-function 'browse-url-generic
-       browse-url-generic-program "/opt/google/chrome/google-chrome")
+       browse-url-generic-program "/usr/bin/chromium-browser")
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
