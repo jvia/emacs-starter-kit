@@ -1,7 +1,7 @@
 ;;; starter-kit-prolog --- Prolog bindings
 ;;
 ;;
-;; Not part of the starter kit.
+;; Part of my starter kit.
 
 ;; Load prolog.el
 (add-to-list 'load-path (concat dotfiles-dir "src"))
@@ -19,4 +19,4 @@
 
 
 (provide 'starter-kit-prolog)
-
+;;; starter-kit-prolog.el ends here
