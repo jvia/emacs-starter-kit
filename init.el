@@ -75,6 +75,7 @@
 (require 'starter-kit-ruby)
 (require 'starter-kit-js)
 (require 'starter-kit-yasnippet)
+(require 'starter-kit-haskell)
 
 (regen-autoloads)
 (load custom-file 'noerror)
