@@ -5,8 +5,7 @@ custom.el
 *elc
 places
 url/cookies
-elpa-to-submit/jabber/jabber.info
-elpa-to-submit/nxhtml/etc/schema/xhtml-loader.rnc
+elpa/
 thumbs/*
 oddmuse/*
 mail
@@ -29,7 +28,6 @@ eshell/history
 
 ## ignore packages held in the src directory
 src/*
-
 
 ## org stuff
 .org-id-locations
