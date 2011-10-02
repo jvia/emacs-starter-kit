@@ -8,6 +8,9 @@
   (mouse-wheel-mode t)
   (blink-cursor-mode -1))
 
+;; allow pound to be typed
+(global-set-key (kbd "M-3") "#")
+
 (add-hook 'before-make-frame-hook 'turn-off-tool-bar)
 
 (set-terminal-coding-system 'utf-8)
@@ -41,13 +44,13 @@
 
 ;; Set this to whatever browser you use
 ;; (setq browse-url-browser-function 'browse-url-firefox)
-;; (setq browse-url-browser-function 'browse-default-macosx-browser)
+; (setq browse-url-browser-function 'browse-default-macosx-browser)
 ;; (setq browse-url-browser-function 'browse-default-windows-browser)
 ;; (setq browse-url-browser-function 'browse-default-kde)
 ;; (setq browse-url-browser-function 'browse-default-epiphany)
 ;; (setq browse-url-browser-function 'browse-default-w3m)
- (setq browse-url-browser-function 'browse-url-generic
-       browse-url-generic-program "/usr/bin/chromium-browser")
+;;(setq browse-url-browser-function 'browse-url-generic
+;;     browse-url-generic-program "/usr/bin/chromium-browser")
 
 ;; Transparently open compressed files
 (auto-compression-mode t)
@@ -76,6 +79,7 @@
 
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'text-mode-hook 'turn-on-flyspell)
+(setq-default ispell-program-name "/usr/local/bin/aspell")
 
 (defvar coding-hook nil
   "Hook that gets run on activation of any programming mode.")

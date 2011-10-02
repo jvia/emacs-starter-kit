@@ -11,6 +11,15 @@
 (autoload 'prolog-mode  "prolog" "Major mode for editing Prolog programs." t)
 (autoload 'mercury-mode "prolog" "Major mode for editing Mercury programs." t)
 
+
+;; (((getenv "EPROLOG")
+;;   (eval (getenv "EPROLOG")))
+;;  (eclipse "eclipse")
+;;  (mercury nil)
+;;  (sicstus "sicstus")
+;;  (swi "swipl")
+;;  (t "prolog"))
+
 ;; Use SWI-Prolog
 (setq prolog-system 'swi)
 (setq auto-mode-alist (append '(("\\.pl$" . prolog-mode)

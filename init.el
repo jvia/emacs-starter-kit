@@ -11,31 +11,26 @@
 
 ;; Turn off mouse interface early in startup to avoid momentary display
 ;; You really don't need these; trust me.
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+;;(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 ;; Load path etc.
-
 (setq dotfiles-dir (file-name-directory
                     (or (buffer-file-name) load-file-name)))
 
 ;; Load up ELPA, the package manager
-
 (add-to-list 'load-path dotfiles-dir)
 (add-to-list 'load-path (concat dotfiles-dir "/elpa-to-submit"))
 
 ;; Load up auctex
-
-(add-to-list 'load-path (concat dotfiles-dir "src/auctex/"))
+(add-to-list 'load-path (concat dotfiles-dir "src/auctex"))
 (add-to-list 'load-path (concat dotfiles-dir "src/auctex/preview"))
 
 ;; Load latest org mode
-
 (add-to-list 'load-path (concat dotfiles-dir "src/org"))
 
 ;; Load others
-
 (setq autoload-file (concat dotfiles-dir "loaddefs.el"))
 (setq package-user-dir (concat dotfiles-dir "elpa"))
 (setq custom-file (concat dotfiles-dir "custom.el"))
@@ -49,7 +44,6 @@
 
 ;; These should be loaded on startup rather than autoloaded on demand
 ;; since they are likely to be used in every session
-
 (require 'cl)
 (require 'saveplace)
 (require 'ffap)
@@ -62,7 +56,6 @@
 (require 'dominating-file)
 
 ;; Load up starter kit customizations
-
 (require 'starter-kit-defuns)
 (require 'starter-kit-bindings)
 (require 'starter-kit-c)
@@ -72,11 +65,11 @@
 (require 'starter-kit-latex)
 (require 'starter-kit-lisp)
 ;;(require 'starter-kit-perl)
-(require 'starter-kit-prolog)
-(require 'starter-kit-ruby)
-(require 'starter-kit-js)
+;;(require 'starter-kit-prolog)
+;;(require 'starter-kit-ruby)
+;;(require 'starter-kit-js)
 (require 'starter-kit-yasnippet)
-(require 'starter-kit-haskell)
+;;(require 'starter-kit-haskell)
 
 (regen-autoloads)
 (load custom-file 'noerror)
