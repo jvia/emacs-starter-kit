@@ -25,6 +25,7 @@ starter-kit*html
 doc
 eshell/lastdir
 eshell/history
+games/
 
 ## ignore packages held in the src directory
 src/*
