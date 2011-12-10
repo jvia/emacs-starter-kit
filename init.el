@@ -23,8 +23,8 @@
 ;; Add in your own as you wish:
 (defvar my-packages '(auctex cdlatex color-theme
                              color-theme-sanityinc-solarized
-                             ctags gnuplot idle-highlight org
-                             slime starter-kit
+                             ctags gnuplot idle-highlight
+                             markdown-mode org starter-kit
                              starter-kit-bindings
                              starter-kit-lisp synonyms yaml-mode
                              yasnippet yasnippet-bundle yas-jit)
@@ -34,7 +34,51 @@
   (when (not (package-installed-p p))
     (package-install p)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                            personal stuff                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Color theme
 (color-theme-sanityinc-solarized-dark)
+(global-set-key (kbd "M-q") 'fill-paragraph)
+(setq column-number-mode t)
+(global-set-key (kbd "S-p") 'hyperspec-lookup)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                            yasnippet                            ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq yas/prompt-functions '(yas/ido-prompt yas/dropdown-prompt))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                        Settings for C/C++                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq c-default-style '((java-mode . "java")
+                        (awk-mode  . "awk")
+                        (other     . "linux")))
+;; Automatically reindent current line after 'punctuation' character.
+(setq-default c-electric-flag t)
+(setq c-basic-offset 4)
+;; Documentation
+(add-hook 'c-mode-hook 'c-turn-on-eldoc-mode)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;                      Settings for Lisp                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/jxv911/slime/")
+(require 'slime)
+(if (eq system-type 'darwin)
+    (progn
+      (setq inferior-lisp-program "sbcl")
+      (slime-setup '(slime-fancy))))
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(doc-view-continuous t)
+ '(org-agenda-files nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
