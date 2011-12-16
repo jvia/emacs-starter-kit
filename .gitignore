@@ -1,34 +1,44 @@
+## misc
 loaddefs.el*
-backups/*
 auto-save-list
 custom.el
-*elc
 places
-url/cookies
-elpa/
+.svn
+.DS_Store
+tramp
+
+## directories
+backups/*
 thumbs/*
 oddmuse/*
+eshell/*
+image-dired/*
+elim/*
+doc/*
+elpa/*
+src/*
+themes/*
+url/*
+games/
+jxv911/
+
+## exported files
+*el
+*elc
+*html
+*tex
+*pdf
+*txt
+
+## org stuff
+.org-id-locations
+
+## ignore mail/gnus cruft for those who keep mail in this directory
+drafts
+Mail
 mail
 .newsrc-dribble
 .nnmail-cache
 /#.newsrc-dribble#
-.svn
-.DS_Store
-image-dired/
-elim/
-elpa-to-submit/nxhtml/etc/schema/xhtml-loader.rnc~
-tramp
-
-## exported files
-##*el
-starter-kit*html
-doc
-eshell/lastdir
-eshell/history
-games/
-
-## ignore packages held in the src directory
-src/*
-
-## org stuff
-.org-id-locations
+*.SCORE
+marks

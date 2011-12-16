@@ -1,0 +1,1437 @@
+#+title: Emacs Configuration
+`#+options: toc:nil num:nil ^:nil
+#+startup: hidestars indent
+
+
+#+begin_quote
+Emacs outshines all other editing software in approximately the same
+way that the noonday sun does the stars. It is not just bigger and
+brighter; it simply makes everything else vanish.
+
+-- Neal Stephenson, "In the Beginning was the Command Line"
+#+end_quote
+
+* Introduction
+:PROPERTIES:
+:CUSTOM_ID: introduction
+:END:
+
+This should provide a saner set of defaults than you get normally with
+Emacs. It's intended for beginners, but provides a good elisp
+initialization structure for all levels of users.
+
+The main advantage of this Emacs Starter Kit are
+- better default settings
+- inclusion of many useful libraries and configurations
+- "literate" customization embedded in Org-mode files
+- an organizational directory structure
+- git provides for version control, backup, and sharing
+
+The latest version is at http://github.com/eschulte/emacs24-starter-kit/
+
+** Learning
+:PROPERTIES:
+:CUSTOM_ID: learning
+:END:
+This won't teach you Emacs, but it'll make it easier to get
+comfortable. To access the tutorial, press control-h followed by t
+from within Emacs.
+
+The [[http://emacswiki.org][Emacs Wiki]] is also very handy.
+
+** Installation
+:PROPERTIES:
+:CUSTOM_ID: installation
+:END:
+
+1. Install Emacs version 24 or greater.  Use your package manager if
+   you have one and it has an install candidate for Emacs 24,
+   otherwise install it directly [[http://savannah.gnu.org/projects/emacs/][from source]], or Mac binaries may be
+   downloaded from the /nightlies/ section of
+   http://emacsformacosx.com/builds
+
+2. Checkout a version of the starter kit using git -- if you're new to
+   git checkout this [[http://www.kernel.org/pub/software/scm/git/docs/gittutorial.html][git-tutorial]], also we'd highly recommend that you
+   try out [[http://zagadka.vm.bytemark.co.uk/magit/magit.html][magit]] the Emacs mode for git interaction.
+
+   #+begin_src sh
+     git clone http://github.com/eschulte/emacs24-starter-kit.git
+   #+end_src
+
+3. Move the resulting directory to =~/.emacs.d= [1]
+
+4. Launch Emacs!
+
+After setup you may need to restart Emacs one or twice while it
+downloads packages from [[* Emacs Lisp Package Archive][ELPA]] -- errors parsing html from
+=*tromey.com:80*= can generally be safely ignored.
+
+If you are missing some autoloads after an update (should manifest
+itself as =void function: foobar= errors) try M-x regen-autoloads.
+
+If you want to keep your regular =~/.emacs.d= in place and just launch
+a single instance using the starter kit, try the following invocation:
+
+#+begin_src sh
+  emacs -q -l ~/path/to/emacs24-starter-kit/init.el
+#+end_src
+
+Note that having a =~/.emacs= file might override the starter kit
+loading, so if you've having trouble loading it, make sure that file
+is not present.
+
+** Structure
+:PROPERTIES:
+:CUSTOM_ID: structure
+:END:
+
+The =init.el= file is where everything begins. It is loaded
+automatically by Emacs on startup, its sole purpose is to load the
+elisp code embedded in this file.  This file then loads some minimal
+configuration which should be generally useful, and goes on to load
+user-specific configuration files from the following locations
+mentioned in [[customizations]] immediately below.
+
+** Customization
+:PROPERTIES:
+:CUSTOM_ID: customization
+:tangle:   no
+:END:
+
+The defaults built into the starter kit are only the beginning of
+most users customization of Emacs to suite their needs.  The starter
+kit provides a number of places for additional user and system
+specific customization.  These are designed in such a way that it will
+be easy for you to continue tracking your own personal customization
+inside the starter-kit while retaining your ability to pull down
+general starter-kit updates without conflict.
+
+- git branch :: The first step to user-specific customization is (like
+                in any git project) to MAKE A BRANCH FOR YOUR LOCAL CHANGES.
+                Save the master branch for pulling down new versions of the
+                starter kit, and save all of your personal information in a
+                personal branch.  That way you never have to worry about
+                accidentally =git push='ing up a patch with all of your gnus
+                email passwords.
+
+- User specific config :: Your personal configuration information can
+     be stored in a user-specific-config file.  This is the file named
+     after your user with the extensions =.el= or =.org= [2].  If
+     you're unsure of your user name evaluate the following code block
+     to find out.
+     #+begin_src sh
+       echo $USER
+     #+end_src
+
+     If your configuration starts to feel cramped in a single file
+     (although with the nested headlines of an Org-mode file, that
+     could take a while) and you want to stretch your config's legs,
+     you can also create a directory named after your system user
+     name.  If a such a directory exists, it will be added to the
+     load-path, and any elisp or org-mode w/embedded elisp files in it
+     will be loaded.
+
+- System specific config :: Finally, you may want to configure
+     different settings for different machines.  The Starter Kit will
+     look for a file named after the current hostname ending in =.el=
+     or =.org= which will allow host-specific configuration.  If
+     you're unsure of your hostname the following can be executed to
+     find out.
+     #+begin_src sh
+       hostname
+     #+end_src
+
+- Activating more of the starter kit :: By default, the starter kit
+     only includes customizations which are likely to be useful across
+     nearly any Emacs install (the only automatically loaded external
+     files are those listed in [[#load-the-starter-kit-core][Load the rest of the starter kit core]]).
+     You may have noticed that there are many other
+     =starter-kit-*.org= files located in this directory.  A good
+     first step is to browse these files and begin optionally loading
+     those that look relevant to your workflow.  For example, if you
+     often work with Python source code you will probably want to load
+     =starter-kit-python.org= either by directly copying the sections
+     that look useful into your personal config, or simply by loading
+     the entire file directly with the following.
+     #+begin_src emacs-lisp
+       (starter-kit-load "python")
+     #+end_src
+
+     Alternately you can load only one particular subsection of an
+     included file, for example to load just the "pretty-summary"
+     section of =starter-kit-gnus.org= run the following.
+     #+begin_src emacs-lisp
+       (starter-kit-load "gnus" "pretty-summary")
+     #+end_src
+
+     Finally you can load just those subsections of a file which have
+     a specific tag, so to load just the two sections of
+     =starter-kit-misc-recommended.org= which are tagged =visual= add
+     the following to your personal initialization.  Note: header id's
+     take priority over tags.
+     #+begin_src emacs-lisp
+       (starter-kit-load "gnus" "visual")
+     #+end_src
+
+- Installing more elisp libraries :: The easiest way to install new
+     libraries is through the Emacs Lisp Package Archive (see [[#emacs-lisp-package-archive][Emacs
+     Lisp Package Archive]] below).  When a library is not available
+     through ELPA you can grab it's source and place it directly in
+     the =src= directory.  Any packages found there will automatically
+     be added to your load-path when Emacs starts up, and are
+     guaranteed not to conflict with future starter-kit updates.
+
+- Misc :: Some additional miscellaneous configuration and getting
+          started suggestions
+   - First see the [[http://www.gnu.org/software/emacs/manual/html_node/emacs/Customization.html#Customization][Customization]] node in the Emacs manual.  Available
+     online or through the =info= command (run with =C-h i=).
+   - =grep='ing through the =starter-kit-*= files in this directory
+     can provide useful examples for how to do things like install
+     major modes, define keybindings, etc..
+   - read the following [[http://www.gnu.org/software/emacs/elisp/html_node/Key-Binding-Conventions.html][Key-Binding-Conventions]] before defining too
+     many personal key bindings
+
+*** Optional starter kit packages
+The following customization packages are shipped with the starter kit
+but are not loaded by default.  If you have code which you find
+generally useful please submit it to the starter kit core!
+- [[file:starter-kit-eshell.org][eshell]]
+- [[file:starter-kit-g-client.org][g-client]]
+- [[file:starter-kit-gnus.org][gnus]]
+- [[file:starter-kit-haskell.org][haskell]]
+- [[file:starter-kit-js.org][js]]
+- [[file:starter-kit-lisp.org][lisp]]
+- [[file:starter-kit-misc-recommended.org][misc-recommended]]
+- [[file:starter-kit-org.org][org]]
+- [[file:starter-kit-perl.org][perl]]
+- [[file:starter-kit-python.org][python]]
+- [[file:starter-kit-ruby.org][ruby]]
+
+** Emacs Lisp Package Archive
+:PROPERTIES:
+:CUSTOM_ID: emacs-lisp-package-archive
+:END:
+
+Libraries from [[http://tromey.com/elpa][ELPA]] are preferred when available since dependencies
+are handled automatically, and the burden to update them is removed
+from the user.  ELPA is now an official part of Emacs so no special
+configuration is required to download and install packages.  Packages
+installed through ELPA will be stored in the =elpa/= sub-directory of
+this directory.
+
+* Basics
+:PROPERTIES:
+:CUSTOM_ID: implementation
+:END:
+
+This section contains all code implementing the Emacs Starter Kit.  It
+is probably safe to stop reading at this point unless you are
+interested in the actual code implementing the starter kit.
+
+- Load path etc.
+
+  #+srcname: starter-kit-load-paths
+  #+begin_src emacs-lisp
+    (add-to-list 'load-path starter-kit-dir)
+    (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
+    (setq package-user-dir (concat starter-kit-dir "elpa"))
+    (setq custom-file (concat starter-kit-dir "custom.el"))
+  #+end_src
+
+- Ubiquitous Packages which should be loaded on startup rather than
+  autoloaded on demand since they are likely to be used in every
+  session.
+
+  #+srcname: starter-kit-load-on-startup
+  #+begin_src emacs-lisp
+    (require 'cl)
+    (require 'saveplace)
+    (require 'ffap)
+    (require 'uniquify)
+    (require 'ansi-color)
+    (require 'recentf)
+  #+end_src
+
+- ELPA archive repositories and two packages to install by default.
+
+  #+begin_src emacs-lisp
+        (setq package-archives
+              '(("original"    . "http://tromey.com/elpa/")
+                ("gnu"         . "http://elpa.gnu.org/packages/")
+                ("marmalade"   . "http://marmalade-repo.org/packages/")))
+        (package-initialize)
+        
+        (defvar starter-kit-packages
+          '(auctex
+            cdlatex
+            color-theme
+            color-theme-sanityinc-solarized
+            ctags
+            htmlize
+            gnuplot
+            idle-highlight
+            markdown-mode
+            org
+            python-mode
+            starter-kit
+            starter-kit-bindings
+            starter-kit-lisp
+            synonyms
+            yaml-mode
+            yasnippet
+            yasnippet-bundle
+            yas-jit)
+          "Libraries that should be installed by default.")
+        
+        (unless package-archive-contents
+          (package-refresh-contents))
+        (dolist (package starter-kit-packages)
+          (unless (package-installed-p package)
+            (package-install package)))
+        
+  #+end_src
+
+- Functions for loading other parts of the starter kit
+
+  #+srcname: starter-kit-load
+  #+begin_src emacs-lisp
+    (defun starter-kit-load (file &optional header-or-tag)
+      "Load configuration from other starter-kit-*.org files.
+       If the optional argument is the id of a subtree then only
+       configuration from within that subtree will be loaded.  If it
+       is not an id then it will be interpreted as a tag, and only
+       subtrees marked with the given tag will be loaded.
+
+       For example, to load all of starter-kit-lisp.org simply
+       add (starter-kit-load \"lisp\") to your configuration.
+
+       To load only the 'window-system' config from
+       starter-kit-misc-recommended.org add
+       (starter-kit-load \"misc-recommended\" \"window-system\") to
+       your configuration."
+      (let ((file (expand-file-name (if (string-match "starter-kit-.+\.org" file)
+                                        file
+                                      (format "starter-kit-%s.org" file))
+                                    starter-kit-dir)))
+        (org-babel-load-file
+         (if header-or-tag
+             (let* ((base (file-name-nondirectory file))
+                    (dir  (file-name-directory file))
+                    (partial-file (expand-file-name
+                                   (concat "." (file-name-sans-extension base)
+                                           ".part." header-or-tag ".org")
+                                   dir)))
+               (unless (file-exists-p partial-file)
+                 (with-temp-file partial-file
+                   (insert
+                    (with-temp-buffer
+                      (insert-file-contents file)
+                      (save-excursion
+                        (condition-case nil ;; collect as a header
+                            (progn
+                              (org-link-search (concat"#"header-or-tag))
+                              (org-narrow-to-subtree)
+                              (buffer-string))
+                          (error ;; collect all entries with as tags
+                           (let (body)
+                             (org-map-entries
+                              (lambda ()
+                                (save-restriction
+                                  (org-narrow-to-subtree)
+                                  (setq body (concat body "\n" (buffer-string)))))
+                              header-or-tag)
+                             body))))))))
+               partial-file)
+           file))))
+  #+end_src
+
+- Work around a bug on OS X where system-name is FQDN.
+  #+srcname: starter-kit-osX-workaround
+  #+begin_src emacs-lisp
+    (if (eq system-type 'darwin)
+        (setq system-name (car (split-string system-name "\\."))))
+  #+end_src
+
+* The starter-kit-coding-hook:
+
+A single hook holding those functions which should be run in *every*
+code buffer.
+
+We have a number of turn-on-* functions since it's advised that lambda
+functions not go in hooks. Repeatedly evaling an add-to-list with a
+hook value will repeatedly add it since there's no way to ensure that
+a lambda doesn't already exist in the list.
+
+#+srcname: starter-kit-hook-functions
+#+begin_src emacs-lisp
+(defun starter-kit-local-column-number-mode ()
+  (make-local-variable 'column-number-mode)
+  (column-number-mode t))
+
+(defun starter-kit-local-comment-auto-fill ()
+  (set (make-local-variable 'comment-auto-fill-only-comments) t)
+  (auto-fill-mode t))
+
+(defun starter-kit-turn-on-save-place-mode ()
+  (setq save-place t))
+
+(defun starter-kit-turn-on-whitespace ()
+  (whitespace-mode t))
+#+end_src
+
+#+srcname: starter-kit-add-local-column-number-mode
+#+begin_src emacs-lisp
+(add-hook 'starter-kit-coding-hook 'starter-kit-local-column-number-mode)
+#+end_src
+
+#+srcname: start-kit-add-local-comment-auto-fill
+#+begin_src emacs-lisp
+(add-hook 'starter-kit-coding-hook 'starter-kit-local-comment-auto-fill)
+#+end_src
+
+#+srcname: starter-kit-add-pretty-lambdas
+#+begin_src emacs-lisp
+  (when (window-system)
+    (add-hook 'starter-kit-coding-hook 'starter-kit-pretty-lambdas))
+#+end_src
+
+#+srcname: starter-kit-run-starter-kit-coding-hook
+#+begin_src emacs-lisp
+(defun run-starter-kit-coding-hook ()
+  "Enable things that are convenient across all coding buffers."
+  (run-hooks 'starter-kit-coding-hook))
+#+end_src
+
+* Key Bindings
+
+Key Bindings.
+
+** You know, like Readline.
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-M-h") 'backward-kill-word)
+#+end_src
+
+** Align your code in a pretty way.
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-x \\") 'align-regexp)
+#+end_src
+
+** Completion that uses many different methods to find options.
+#+begin_src emacs-lisp
+(global-set-key (kbd "M-/") 'hippie-expand)
+#+end_src
+
+** Turn on the menu bar for exploring new modes
+#+begin_src emacs-lisp
+(global-set-key [f1] 'menu-bar-mode)
+#+end_src
+
+** Font size
+#+begin_src emacs-lisp
+(define-key global-map (kbd "C-+") 'text-scale-increase)
+(define-key global-map (kbd "C--") 'text-scale-decrease)
+#+end_src
+
+** Use regex searches by default.
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-s") 'isearch-forward-regexp)
+(global-set-key (kbd "\C-r") 'isearch-backward-regexp)
+(global-set-key (kbd "C-M-s") 'isearch-forward)
+(global-set-key (kbd "C-M-r") 'isearch-backward)
+#+end_src
+
+** File finding
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-x M-f") 'ido-find-file-other-window)
+(global-set-key (kbd "C-x C-p") 'find-file-at-point)
+(global-set-key (kbd "C-c y") 'bury-buffer)
+(global-set-key (kbd "C-c r") 'revert-buffer)
+(global-set-key (kbd "M-`") 'file-cache-minibuffer-complete)
+(global-set-key (kbd "C-x C-b") 'ibuffer)
+#+end_src
+
+** Window switching. (C-x o goes to the next window)
+#+begin_src emacs-lisp
+(windmove-default-keybindings) ;; Shift+direction
+(global-set-key (kbd "C-x O") (lambda () (interactive) (other-window -1))) ;; back one
+(global-set-key (kbd "C-x C-o") (lambda () (interactive) (other-window 2))) ;; forward two
+#+end_src
+
+** Indentation help
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-x ^") 'join-line)
+#+end_src
+
+** If you want to be able to M-x without meta
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-x C-m") 'execute-extended-command)
+#+end_src
+
+** Help should search more than just commands
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-h a") 'apropos)
+#+end_src
+
+** Activate occur easily inside isearch
+#+begin_src emacs-lisp
+  (define-key isearch-mode-map (kbd "C-o")
+    (lambda () (interactive)
+      (let ((case-fold-search isearch-case-fold-search))
+        (occur (if isearch-regexp
+                   isearch-string
+                 (regexp-quote isearch-string))))))
+#+end_src
+
+** Org-mode
+Two global binding for Org-mode (see [[file:starter-kit-org.org][starter-kit-org]])
+
+The [[http://orgmode.org/manual/Agenda-Views.html#Agenda-Views][Org-mode agenda]] is good to have close at hand
+#+begin_src emacs-lisp
+  (define-key global-map "\C-ca" 'org-agenda)
+#+end_src
+
+Org-mode supports [[http://orgmode.org/manual/Hyperlinks.html#Hyperlinks][links]], this command allows you to store links
+globally for later insertion into an Org-mode buffer.  See
+[[http://orgmode.org/manual/Handling-links.html#Handling-links][Handling-links]] in the Org-mode manual.
+#+begin_src emacs-lisp
+  (define-key global-map "\C-cl" 'org-store-link)
+#+end_src
+
+** Rgrep
+Rgrep is infinitely useful in multi-file projects.
+
+(see [[elisp:(describe-function 'rgrep)]])
+
+#+begin_src emacs-lisp
+  (define-key global-map "\C-x\C-r" 'rgrep)
+#+end_src
+
+* Miscellaneous
+Things that don't fit anywhere else.
+
+** Color Themes
+Emacs24 has build in support for saving and loading themes.
+
+A Theme builder is available at http://elpa.gnu.org/themes/ along with
+a list of pre-built themes at http://elpa.gnu.org/themes/view.html and
+themes are available through ELPA.
+
+Downloaded themes may be saved to the =themes/= directory in the base
+of the starter kit which ignored by git.  Once downloaded and
+evaluated a theme is activated using the =load-theme= function.
+
+#+begin_src emacs-lisp
+  (color-theme-sanityinc-solarized-dark)
+#+end_src
+
+** Window systems
+
+#+srcname: starter-kit-window-view-stuff
+#+begin_src emacs-lisp
+(when window-system
+  (setq frame-title-format '(buffer-file-name "%f" ("%b")))
+  (blink-cursor-mode -1))
+
+(mouse-wheel-mode t)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+
+(setq visible-bell t
+      echo-keystrokes 0.1
+      font-lock-maximum-decoration t
+      inhibit-startup-message t
+      transient-mark-mode t
+      color-theme-is-global t
+      delete-by-moving-to-trash t
+      shift-select-mode nil
+      truncate-partial-width-windows nil
+      uniquify-buffer-name-style 'forward
+      whitespace-style '(trailing lines space-before-tab
+                                  indentation space-after-tab)
+      whitespace-line-column 100
+      ediff-window-setup-function 'ediff-setup-windows-plain
+      oddmuse-directory (concat starter-kit-dir "oddmuse")
+      xterm-mouse-mode t
+      save-place-file (concat starter-kit-dir "places"))
+#+end_src
+
+** Transparently open compressed files
+#+begin_src emacs-lisp
+(auto-compression-mode t)
+#+end_src
+
+** Save a list of recent files visited.
+#+begin_emacs-lisp
+(recentf-mode 1)
+#+end_emacs-lisp
+
+** Highlight matching parentheses when the point is on them.
+#+srcname: starter-kit-match-parens
+#+begin_src emacs-lisp
+(show-paren-mode 1)
+#+end_src
+
+** ido mode
+ido-mode is like magic pixie dust!
+#+srcname: starter-kit-loves-ido-mode
+#+begin_src emacs-lisp
+(when (> emacs-major-version 21)
+  (ido-mode t)
+  (setq ido-enable-prefix nil
+        ido-enable-flex-matching t
+        ido-create-new-buffer 'always
+        ido-use-filename-at-point t
+        ido-max-prospects 10))
+#+end_src
+
+** Other, spell checking, tabs, imenu and a coding hook
+#+begin_src emacs-lisp
+  (set-default 'indent-tabs-mode nil)
+  (set-default 'indicate-empty-lines t)
+  (set-default 'imenu-auto-rescan t)
+
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  (add-hook 'text-mode-hook 'turn-on-flyspell)
+
+  (defvar starter-kit-coding-hook nil
+    "Hook that gets run on activation of any programming mode.")
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  ;; Seed the random-number generator
+  (random t)
+#+end_src
+
+*** functions for prettier source code
+#+begin_src emacs-lisp
+(defun starter-kit-pretty-lambdas ()
+  (font-lock-add-keywords
+   nil `(("(\\(lambda\\>\\)"
+          (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                    ,(make-char 'greek-iso8859-7 107))
+                    nil))))))
+#+end_src
+
+*** possible issues/resolutions with flyspell
+Most of the solution came from [[http://www.emacswiki.org/emacs/FlySpell][EmacsWiki-FlySpell]].  Here is one
+possible fix.
+
+**** Emacs set path to aspell
+it's possible aspell isn't in your path
+#+begin_src emacs-lisp :tangle no
+   (setq exec-path (append exec-path '("/opt/local/bin")))
+#+end_src
+
+**** Emacs specify spelling program
+- This didn't work at first, possibly because cocoAspell was
+  building its dictionary.  Now it seems to work fine.
+#+begin_src emacs-lisp :tangle no
+  (setq ispell-program-name "aspell"
+        ispell-dictionary "english"
+        ispell-dictionary-alist
+        (let ((default '("[A-Za-z]" "[^A-Za-z]" "[']" nil
+                         ("-B" "-d" "english" "--dict-dir"
+                          "/Library/Application Support/cocoAspell/aspell6-en-6.0-0")
+                         nil iso-8859-1)))
+          `((nil ,@default)
+            ("english" ,@default))))
+#+end_src
+
+** Hippie expand: at times perhaps too hip
+#+begin_src emacs-lisp
+(delete 'try-expand-line hippie-expand-try-functions-list)
+(delete 'try-expand-list hippie-expand-try-functions-list)
+#+end_src
+
+** Don't clutter up directories with files~
+Rather than saving backup files scattered all over the file system,
+let them live in the =backups/= directory inside of the starter kit.
+#+begin_src emacs-lisp
+(setq backup-directory-alist `(("." . ,(expand-file-name
+                                        (concat starter-kit-dir "backups")))))
+#+end_src
+
+** Default to unified diffs
+#+begin_src emacs-lisp
+(setq diff-switches "-u")
+#+end_src
+
+** Cosmetics
+
+#+begin_src emacs-lisp
+(eval-after-load 'diff-mode
+  '(progn
+     (set-face-foreground 'diff-added "green4")
+     (set-face-foreground 'diff-removed "red3")))
+
+(eval-after-load 'magit
+  '(progn
+     (set-face-foreground 'magit-diff-add "green3")
+     (set-face-foreground 'magit-diff-del "red3")))
+#+end_src
+** Window systems -- remove visual cruft                             :visual:
+:PROPERTIES:
+:CUSTOM_ID: window-system
+:END:
+
+#+srcname: starter-kit-window-view-stuff-recommended
+#+begin_src emacs-lisp
+(when window-system
+  (tooltip-mode -1)
+  (tool-bar-mode -1))
+#+end_src
+
+** No Menu Bar                                                       :visual:
+
+You really don't need this; trust me.
+#+srcname: starter-kit-no-menu
+#+begin_src emacs-lisp
+(menu-bar-mode -1)
+#+end_src
+
+** Nxhtml -- utilities for we development
+[[http://ourcomments.org/Emacs/nXhtml/doc/nxhtml.html][
+Nxhtml]] is a large package of utilities for web development and for
+embedding multiple major modes in a single buffer.
+
+Nxhtml is not installed in this version of the starter-kit by default,
+for information on installing nxhtml see [[http://www.emacswiki.org/emacs/NxhtmlMode][EmacsWiki-Nxhtml]].
+
+*** Set browser
+
+Set this to whatever browser you use e.g...
+: ;; (setq browse-url-browser-function 'browse-url-firefox)
+: ;; (setq browse-url-browser-function 'browse-default-macosx-browser)
+: ;; (setq browse-url-browser-function 'browse-default-windows-browser)
+: ;; (setq browse-url-browser-function 'browse-default-kde)
+: ;; (setq browse-url-browser-function 'browse-default-epiphany)
+: ;; (setq browse-url-browser-function 'browse-default-w3m)
+: ;; (setq browse-url-browser-function 'browse-url-generic
+: ;;       browse-url-generic-program "~/src/conkeror/conkeror")
+
+** Associate modes with file extensions
+
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("COMMIT_EDITMSG$" . diff-mode))
+  (add-to-list 'auto-mode-alist '("\\.css$" . css-mode))
+  (require 'yaml-mode)
+  (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\.rb$" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\(on\\)?$" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.xml$" . nxml-mode))
+#+end_src
+
+* Registers
+
+Registers allow you to jump to a file or other location quickly. Use
+=C-x r j= followed by the letter of the register (i for =init.el=, s
+for this file) to jump to it.
+
+You should add registers here for the files you edit most often.
+
+#+srcname: starter-kit-registers
+#+begin_src emacs-lisp :results silent
+  (dolist
+      (r `((?i (file . ,(concat starter-kit-dir "init.el")))
+           (?I (file . ,(let* ((user (getenv "USER"))
+                               (org (expand-file-name (concat user ".org") starter-kit-dir))
+                               (el  (expand-file-name (concat user ".el") starter-kit-dir))
+                               (dir (expand-file-name user starter-kit-dir)))
+                          (cond
+                           ((file-exists-p org) org)
+                           ((file-exists-p el)  el)
+                           (t dir)))))
+           (?s (file . ,(concat starter-kit-dir "starter-kit.org")))
+           (?r (file . ,(concat starter-kit-dir "starter-kit-registers.org")))))
+    (set-register (car r) (cadr r)))
+#+end_src
+* Yasnippet
+- [[http://code.google.com/p/yasnippet/][yasnippet]] is yet another snippet expansion system for Emacs.  It is
+  inspired by TextMate's templating syntax.
+  - watch the [[http://www.youtube.com/watch?v=vOj7btx3ATg][video on YouTube]]
+  - see the [[http://yasnippet.googlecode.com/svn/trunk/doc/index.html][intro and tutorial]]
+
+  load the yasnippet bundle
+  #+begin_src emacs-lisp
+    ;; (add-to-list 'load-path
+    ;;              (expand-file-name  "yasnippet"
+    ;;                                 (expand-file-name "src"
+    ;;                                                   starter-kit-dir)))
+    ;; (require 'yasnippet)
+    ;; (yas/initialize)
+  #+end_src
+
+  load the snippets defined in the =./snippets/= directory
+  #+begin_src emacs-lisp
+    (yas/load-directory (expand-file-name "snippets" starter-kit-dir))
+  #+end_src
+
+  The latest version of yasnippets doesn't play well with Org-mode, the
+  following function allows these two to play nicely together.
+  #+begin_src emacs-lisp
+    (defun yas/org-very-safe-expand ()
+      (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+
+    (defun yas/org-setup ()
+      ;; yasnippet (using the new org-cycle hooks)
+      (make-variable-buffer-local 'yas/trigger-key)
+      (setq yas/trigger-key [tab])
+      (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+      (define-key yas/keymap [tab] 'yas/next-field))
+
+    (add-hook 'org-mode-hook #'yas/org-setup)
+  #+end_src
+
+* Eshell
+
+[[http://www.emacswiki.org/emacs/CategoryEshell][Eshell]] is a great shell.
+
+#+begin_src emacs-lisp
+  (setq eshell-cmpl-cycle-completions nil
+        eshell-save-history-on-exit t
+        eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
+
+  (eval-after-load 'esh-opt
+    '(progn
+       (require 'em-cmpl)
+       (require 'em-prompt)
+       (require 'em-term)
+       ;; TODO: for some reason requiring this here breaks it, but
+       ;; requiring it after an eshell session is started works fine.
+       ;; (require 'eshell-vc)
+       (setenv "PAGER" "cat")
+       ; (set-face-attribute 'eshell-prompt nil :foreground "turquoise1")
+       (add-hook 'eshell-mode-hook ;; for some reason this needs to be a hook
+                 '(lambda () (define-key eshell-mode-map "\C-a" 'eshell-bol)))
+       (add-to-list 'eshell-visual-commands "ssh")
+       (add-to-list 'eshell-visual-commands "tail")
+       (add-to-list 'eshell-command-completions-alist
+                    '("gunzip" "gz\\'"))
+       (add-to-list 'eshell-command-completions-alist
+                    '("tar" "\\(\\.tar|\\.tgz\\|\\.tar\\.gz\\)\\'"))
+       (add-to-list 'eshell-output-filter-functions 'eshell-handle-ansi-color)))
+#+end_src
+
+The =eshell= directory holds alias definitions and history
+information.  It is much like a =.bashrc= file for those who are
+familiar with bash.  This set the value of =eshell-directory-name= to
+point to the =eshell= directory in this directory.  The =alias= file
+is pre-populated with some generally applicable aliases.
+
+#+begin_src emacs-lisp
+  (setq eshell-directory-name
+        (expand-file-name "./" (expand-file-name "eshell" starter-kit-dir)))
+#+end_src
+
+* Haskell
+:PROPERTIES:
+:results:  silent
+:END:
+
+Support for editing Haskell
+
+pretty lambdas in Haskell code
+#+begin_src emacs-lisp
+  (defun pretty-lambdas-haskell ()
+    (font-lock-add-keywords
+     nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
+            (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                      ,(make-char 'greek-iso8859-7 107))
+                      nil))))))
+#+end_src
+
+Haskell mode hook
+#+begin_src emacs-lisp
+  (add-hook 'haskell-mode-hook 'run-starter-kit-coding-hook)
+  (when (window-system)
+    (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
+#+end_src
+* Javascript
+
+Java-script Helpers
+
+#+begin_src emacs-lisp
+(font-lock-add-keywords
+ 'espresso-mode `(("\\(function *\\)("
+                   (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                             "ƒ")
+                             nil)))))
+#+end_src
+
+#+begin_src emacs-lisp
+(font-lock-add-keywords 'espresso-mode
+                        '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
+                           1 font-lock-warning-face t)))
+#+end_src
+
+#+begin_src emacs-lisp
+(autoload 'espresso-mode "espresso" "Start espresso-mode" t)
+(add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
+(add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
+(add-hook 'espresso-mode-hook 'moz-minor-mode)
+(add-hook 'espresso-mode-hook 'turn-on-paredit)
+(add-hook 'espresso-mode-hook 'run-starter-kit-coding-hook)
+;; (add-hook 'espresso-mode-hook 'idle-highlight)
+(setq espresso-indent-level 2)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun starter-kit-pp-json ()
+  "Pretty-print the json object following point."
+  (interactive)
+  (require 'json)
+  (let ((json-object (save-excursion (json-read))))
+    (switch-to-buffer "*json*")
+    (delete-region (point-min) (point-max))
+    (insert (pp json-object))
+    (goto-char (point-min))))
+#+end_src
+
+* Lisp
+Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Scheme][Scheme]],
+[[* Common Lisp][Common Lisp]], and [[* Clojure][Clojure]].
+
+** Define keys
+:PROPERTIES:
+:CUSTOM_ID: keys
+:END:
+#+srcname: starter-kit-define-lisp-keys
+#+begin_src emacs-lisp
+  (define-key read-expression-map (kbd "TAB") 'lisp-complete-symbol)
+  ;; (define-key lisp-mode-shared-map (kbd "C-c l") "lambda")
+  (define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
+  (define-key lisp-mode-shared-map (kbd "C-\\") 'lisp-complete-symbol)
+  ;; (define-key lisp-mode-shared-map (kbd "C-c v") 'eval-buffer)
+#+end_src
+
+** Paredit
+:PROPERTIES:
+:CUSTOM_ID: paredit
+:END:
+[[http://www.emacswiki.org/emacs/ParEdit][Paredit]] might seem weird at first, but it really makes writing lisp a
+much more comfortable experience.  This is especially useful in
+combination with the sexp movement functions (=C-M-f= forward, =C-M-b=
+back, =C-M-u= up, =C-M-d= down)
+
+#+begin_src emacs-lisp
+(defun turn-on-paredit ()
+  (paredit-mode +1))
+#+end_src
+
+: ;; (eval-after-load 'paredit
+: ;;      ;; Not sure why paredit behaves this way with comments; it's annoying
+: ;;   '(define-key paredit-mode-map (kbd ";")   'self-insert-command))
+
+** Non-obtrusive parenthesis faces
+:PROPERTIES:
+:CUSTOM_ID: parenthesis-faces
+:END:
+#+begin_src emacs-lisp
+(defface starter-kit-paren-face
+   '((((class color) (background dark))
+      (:foreground "grey50"))
+     (((class color) (background light))
+      (:foreground "grey55")))
+   "Face used to dim parentheses."
+   :group 'starter-kit-faces)
+#+end_src
+
+** Emacs Lisp
+:PROPERTIES:
+:CUSTOM_ID: emacs-lisp
+:END:
+
+#+begin_src emacs-lisp
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+(add-hook 'emacs-lisp-mode-hook 'run-starter-kit-coding-hook)
+(add-hook 'emacs-lisp-mode-hook 'starter-kit-remove-elc-on-save)
+;; (add-hook 'emacs-lisp-mode-hook 'idle-highlight)
+(add-hook 'emacs-lisp-mode-hook 'turn-on-paredit)
+(define-key emacs-lisp-mode-map (kbd "C-c v") 'eval-buffer)
+
+(defun starter-kit-remove-elc-on-save ()
+  "If you're saving an elisp file, likely the .elc is no longer valid."
+  (make-local-variable 'after-save-hook)
+  (add-hook 'after-save-hook
+            (lambda ()
+              (if (file-exists-p (concat buffer-file-name "c"))
+                  (delete-file (concat buffer-file-name "c"))))))
+
+(font-lock-add-keywords 'emacs-lisp-mode
+                        '(("(\\|)" . 'starter-kit-paren-face)))
+#+end_src
+
+** Clojure
+:PROPERTIES:
+:CUSTOM_ID: clojure
+:END:
+
+#+begin_src emacs-lisp
+  ;; (require 'clojure-mode)
+  
+  ;; (add-hook 'clojure-mode-hook 'run-starter-kit-coding-hook)
+  
+  ;; (font-lock-add-keywords 'clojure-mode
+  ;;                         '(("(\\|)" . 'starter-kit-paren-face)))
+  
+  ;; (define-key clojure-mode-map (kbd "C-c v") 'slime-eval-buffer)
+  ;; (define-key clojure-mode-map (kbd "C-c C-v") 'slime-eval-buffer)
+  
+  ;; (defface starter-kit-clojure-trace-face
+  ;;    '((((class color) (background dark))
+  ;;       (:foreground "grey50"))
+  ;;      (((class color) (background light))
+  ;;       (:foreground "grey55")))
+  ;;    "Face used to dim parentheses."
+  ;;    :group 'starter-kit-faces)
+  
+  ;; (setq starter-kit-clojure-trace-face 'starter-kit-clojure-trace-face)
+  
+  ;; ;; This will make relevant lines stand out more in stack traces
+  ;; (defun sldb-font-lock ()
+  ;;   (font-lock-add-keywords nil
+  ;;                           '(("[0-9]+: \\(clojure\.\\(core\\|lang\\).*\\)"
+  ;;                              1 starter-kit-clojure-trace-face)
+  ;;                             ("[0-9]+: \\(java.*\\)"
+  ;;                              1 starter-kit-clojure-trace-face)
+  ;;                             ("[0-9]+: \\(swank.*\\)"
+  ;;                              1 starter-kit-clojure-trace-face)
+  ;;                             ("\\[\\([A-Z]+\\)\\]"
+  ;;                              1 font-lock-function-name-face))))
+  
+  ;; (add-hook 'sldb-mode-hook 'sldb-font-lock)
+  
+  ;; (defun slime-jump-to-trace (&optional on)
+  ;;   "Jump to the file/line that the current stack trace line references.
+  ;; Only works with files in your project root's src/, not in dependencies."
+  ;;   (interactive)
+  ;;   (save-excursion
+  ;;     (beginning-of-line)
+  ;;     (search-forward-regexp "[0-9]: \\([^$(]+\\).*?\\([0-9]*\\))")
+  ;;     (let ((line (string-to-number (match-string 2)))
+  ;;           (ns-path (split-string (match-string 1) "\\."))
+  ;;           (project-root (locate-dominating-file default-directory "src/")))
+  ;;       (find-file (format "%s/src/%s.clj" project-root
+  ;;                          (mapconcat 'identity ns-path "/")))
+  ;;       (goto-line line))))
+  
+  ;; (eval-after-load 'slime
+  ;;   '(progn
+  ;;      (defalias 'sldb-toggle-details 'slime-jump-to-trace)
+  ;;      (defun sldb-prune-initial-frames (frames)
+  ;;        "Show all stack trace lines by default."
+  ;;        frames)))
+  
+  ;; (eval-after-load 'find-file-in-project
+  ;;   '(add-to-list 'ffip-patterns "*.clj"))
+  
+  ;; ;; You might like this, but it's a bit disorienting at first:
+  ;; (add-hook 'clojure-mode-hook 'turn-on-paredit)
+  
+  ;; (defun clojure-project (path)
+  ;;   "Setup classpaths for a clojure project and starts a new SLIME session.
+  
+  ;; Kills existing SLIME session, if any."
+  ;;   (interactive (list
+  ;;                 (ido-read-directory-name
+  ;;                  "Project root: "
+  ;;                  (locate-dominating-file default-directory "pom.xml"))))
+  ;;   (when (get-buffer "*inferior-lisp*")
+  ;;     (kill-buffer "*inferior-lisp*"))
+  ;;   (add-to-list 'swank-clojure-extra-vm-args
+  ;;                (format "-Dclojure.compile.path=%s"
+  ;;                        (expand-file-name "target/classes/" path)))
+  ;;   (setq swank-clojure-binary nil
+  ;;         swank-clojure-jar-path (expand-file-name "target/dependency/" path)
+  ;;         swank-clojure-extra-classpaths
+  ;;         (append (mapcar (lambda (d) (expand-file-name d path))
+  ;;                         '("src/" "target/classes/" "test/"))
+  ;;                 (let ((lib (expand-file-name "lib" path)))
+  ;;                   (if (file-exists-p lib)
+  ;;                       (directory-files lib t ".jar$"))))
+  ;;         slime-lisp-implementations
+  ;;         (cons `(clojure ,(swank-clojure-cmd) :init swank-clojure-init)
+  ;;               (remove-if #'(lambda (x) (eq (car x) 'clojure))
+  ;;                          slime-lisp-implementations)))
+  ;;   (save-window-excursion
+  ;;     (slime)))
+  
+#+end_src
+
+#+results:
+: clojure-project
+
+pretty \lambda's in clojure
+#+begin_src emacs-lisp
+  ;; (eval-after-load 'clojure-mode
+  ;;   '(font-lock-add-keywords
+  ;;     'clojure-mode `(("(\\(fn\\>\\)"
+  ;;                      (0 (progn (compose-region (match-beginning 1)
+  ;;                                                (match-end 1) "ƒ")
+  ;;                                nil))))))
+#+end_src
+
+** Scheme
+:PROPERTIES:
+:CUSTOM_ID: scheme
+:END:
+
+#+begin_src emacs-lisp
+(add-hook 'scheme-mode-hook 'run-starter-kit-coding-hook)
+;; (add-hook 'scheme-mode-hook 'idle-highlight)
+(font-lock-add-keywords 'scheme-mode
+                        '(("(\\|)" . 'starter-kit-paren-face)))
+#+end_src
+
+** Common Lisp
+:PROPERTIES:
+:CUSTOM_ID: common-lisp
+:END:
+
+#+begin_src emacs-lisp
+(add-hook 'lisp-mode-hook 'run-starter-kit-coding-hook)
+;; (add-hook 'lisp-mode-hook 'idle-highlight)
+(add-hook 'lisp-mode-hook 'turn-on-paredit)
+(font-lock-add-keywords 'lisp-mode
+                        '(("(\\|)" . 'starter-kit-paren-face)))
+#+end_src
+* Org Mode
+
+Configuration for the eminently useful [[http://orgmode.org/][Org Mode]].
+
+Org-mode is for keeping notes, maintaining ToDo lists, doing project
+planning, and authoring with a fast and effective plain-text system.
+Org Mode can be used as a very simple folding outliner or as a complex
+GTD system or tool for reproducible research and literate programming.
+
+For more information on org-mode check out [[http://orgmode.org/worg/][worg]], a large Org-mode wiki
+which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
+
+** Org-Mode Hook -- Keybindings
+:PROPERTIES:
+:CUSTOM_ID: keybindings
+:END:
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (local-set-key "\M-\C-n" 'outline-next-visible-heading)
+              (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
+              (local-set-key "\M-\C-u" 'outline-up-heading)
+              ;; table
+              (local-set-key "\M-\C-w" 'org-table-copy-region)
+              (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
+              (local-set-key "\M-\C-l" 'org-table-sort-lines)
+              ;; display images
+              (local-set-key "\M-I" 'org-toggle-iimage-in-org)))
+#+end_src
+
+** Speed keys
+:PROPERTIES:
+:CUSTOM_ID: speed-keys
+:END:
+
+Speed commands enable single-letter commands in Org-mode files when
+the point is at the beginning of a headline, or at the beginning of a
+code block.
+
+See the `=org-speed-commands-default=' variable for a list of the keys
+and commands enabled at the beginning of headlines.  All code blocks
+are available at the beginning of a code block, the following key
+sequence =C-c C-v h= (bound to `=org-babel-describe-bindings=') will
+display a list of the code blocks commands and their related keys.
+
+#+begin_src emacs-lisp
+  (setq org-use-speed-commands t)
+#+end_src
+
+** Code blocks
+:PROPERTIES:
+:CUSTOM_ID: babel
+:END:
+
+This activates a number of widely used languages, you are encouraged
+to activate more languages using the customize interface for the
+`=org-babel-load-languages=' variable, or with an elisp form like the
+one below.  The customize interface of `=org-babel-load-languages='
+contains an up to date list of the currently supported languages.
+
+#+begin_src emacs-lisp :tangle no
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (sh . t)))
+#+end_src
+
+You are encouraged to add the following to your personal configuration
+although it is not added by default as a security precaution.
+
+#+begin_src emacs-lisp :tangle no
+  ;;(setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Code block fontification
+:PROPERTIES:
+:CUSTOM_ID: code-block-fontification
+:END:
+
+The following displays the contents of code blocks in Org-mode files
+using the major-mode of the code.  It also changes the behavior of
+=TAB= to as if it were used in the appropriate major mode.  This means
+that reading and editing code form inside of your Org-mode files is
+much more like reading and editing of code using its major mode.
+
+#+begin_src emacs-lisp
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+#+end_src
+
+** The Library of Babel
+:PROPERTIES:
+:CUSTOM_ID: library-of-babel
+:END:
+
+The library of babel contains makes many useful functions available
+for use by code blocks in *any* emacs file.  See the actual
+=library-of-babel.org= (located in the Org-mode =contrib/babel=
+directory) file for information on the functions, and see
+[[http://orgmode.org/worg/org-contrib/babel/intro.php#library-of-babel][worg:library-of-babel]] for more usage information.
+
+Code blocks can be loaded into the library of babel from any Org-mode
+file using the `org-babel-lob-ingest' function.
+
+This file is used to publish the starter kit documentation to =.html=
+in the =doc/= directory.
+
+This code defines the =starter-kit-project= which is used to publish
+the documentation for the Starter Kit to html.
+
+#+begin_src emacs-lisp :results silent
+  ;; (unless (boundp 'org-publish-project-alist)
+  ;;   (setq org-publish-project-alist nil))
+  
+  ;; (let* ((this-dir (file-name-directory (or load-file-name buffer-file-name)))
+  ;;        (org-export-htmlize-output-type 'css)
+  ;;        (load-path (cons (expand-file-name "elpa" this-dir) load-path))
+  ;;        (package-archives '(("original"    . "http://tromey.com/elpa/"))))
+  ;;   ;; load up htmlize
+  ;;   (package-initialize)
+  ;;   (let ((package 'htmlize))
+  ;;     (unless (or (member package package-activated-list)
+  ;;                 (functionp package))
+  ;;       (package-install package)))
+  ;;   (require 'htmlize)
+  ;;   (org-export-htmlize-generate-css)
+  ;;   ;; define the org-publish-project for the starter kit
+  ;;   (add-to-list
+  ;;    'org-publish-project-alist
+  ;;    `("starter-kit-documentation"
+  ;;      :base-directory ,this-dir
+  ;;      :base-extension "org"
+  ;;      ;; :style "<link rel=\"stylesheet\" href=\"emacs.css\" type=\"text/css\"/>
+  ;;      ;;         <style type=\"text/css\">
+  ;;      ;;           pre{background:#232323; color:#E6E1DC; padding:1em 1em 0 1em;}
+  ;;      ;;           code{font-size:10pt; color:#353535;}
+  ;;      ;;          .outline-text-2{margin-left: 1em;}
+  ;;      ;;          .outline-text-3{margin-left: 2em;}
+  ;;      ;;          .outline-text-3{margin-left: 3em;}
+  ;;      ;;        </style>"
+  ;;      :publishing-directory ,(expand-file-name "doc" this-dir)
+  ;;      :index-filename "starter-kit.org"
+  ;;      :html-postamble nil))
+  ;;   ;; publish the starter kit
+  ;;   (org-publish-project "starter-kit-documentation" 'force)
+  ;;   ;; copy starter-kit.html to index.html
+  ;;   (copy-file (expand-file-name "starter-kit.html" (expand-file-name "doc" this-dir))
+  ;;              (expand-file-name "index.html" (expand-file-name "doc" this-dir))))
+  
+#+end_src
+
+** Published Projects
+* Python
+
+Support for the Python programming language.
+
+** Use Python's python-mode.el instead of Emacs' python.el
+   :PROPERTIES:
+   :CUSTOM_ID: python
+   :END:
+Replace the Python mode that comes with Emacs by the Python mode
+supplied by the Python distribution itself.
+#+begin_src emacs-lisp
+(require 'python-mode)
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(add-to-list 'interpreter-mode-alist '("python" . python-mode))
+#+end_src
+
+** Use IPython if =ipython= command is present
+   :PROPERTIES:
+   :CUSTOM_ID: ipython
+   :END:
+If an =ipython= executable is on the path, then assume that IPython is
+the preferred method python evaluation.
+#+begin_src emacs-lisp
+  (when (executable-find "ipython")
+    (require 'ipython)
+    (setq org-babel-python-mode 'python-mode))
+#+end_src
+
+** Use Cython mode
+   :PROPERTIES:
+   :CUSTOM_ID: cython
+   :END:
+#+begin_src emacs-lisp
+  ;; (require 'cython-mode)
+  ;; (add-to-list 'auto-mode-alist '("\\.pyx\\'" . cython-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.pxd\\'" . cython-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.pxi\\'" . cython-mode))
+#+end_src
+* Ruby
+
+Support for the [[http://www.ruby-lang.org/en/][Ruby]] dynamic, open-source programming language.
+
+#+begin_src emacs-lisp
+(eval-after-load 'ruby-mode
+  '(progn
+     ;; work around possible elpa bug
+     (ignore-errors (require 'ruby-compilation))
+     (setq ruby-use-encoding-map nil)
+     (add-hook 'ruby-mode-hook 'inf-ruby-keys)
+     (define-key ruby-mode-map (kbd "RET") 'reindent-then-newline-and-indent)
+     (define-key ruby-mode-map (kbd "C-M-h") 'backward-kill-word)
+     (define-key ruby-mode-map (kbd "C-c l") "lambda")))
+#+end_src
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "C-h r") 'ri)
+#+end_src
+
+** Rake files are ruby, too, as are gemspecs.
+   :PROPERTIES:
+   :CUSTOM_ID: additional-file-extensions
+   :END:
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
+(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
+#+end_src
+
+** We never want to edit Rubinius bytecode
+   :PROPERTIES:
+   :CUSTOM_ID: ignore-rubinius
+   :END:
+#+begin_src emacs-lisp
+(add-to-list 'completion-ignored-extensions ".rbc")
+#+end_src
+
+** Rake
+   :PROPERTIES:
+   :CUSTOM_ID: rake
+   :END:
+
+#+begin_src emacs-lisp
+(defun pcomplete/rake ()
+  "Completion rules for the `ssh' command."
+  (pcomplete-here (pcmpl-rake-tasks)))
+
+(defun pcmpl-rake-tasks ()
+   "Return a list of all the rake tasks defined in the current
+projects.  I know this is a hack to put all the logic in the
+exec-to-string command, but it works and seems fast"
+   (delq nil (mapcar '(lambda(line)
+			(if (string-match "rake \\([^ ]+\\)" line) (match-string 1 line)))
+		     (split-string (shell-command-to-string "rake -T") "[\n]"))))
+
+(defun rake (task)
+  (interactive (list (completing-read "Rake (default: default): "
+                                      (pcmpl-rake-tasks))))
+  (shell-command-to-string (concat "rake " (if (= 0 (length task)) "default" task))))
+#+end_src
+
+** Compilation
+   :PROPERTIES:
+   :CUSTOM_ID: compilation
+   :END:
+Clear the compilation buffer between test runs.
+
+#+begin_src emacs-lisp
+(eval-after-load 'ruby-compilation
+  '(progn
+     (defadvice ruby-do-run-w/compilation (before kill-buffer (name cmdlist))
+       (let ((comp-buffer-name (format "*%s*" name)))
+         (when (get-buffer comp-buffer-name)
+           (with-current-buffer comp-buffer-name
+             (delete-region (point-min) (point-max))))))
+     (ad-activate 'ruby-do-run-w/compilation)))
+#+end_src
+
+** Hooks
+   :PROPERTIES:
+   :CUSTOM_ID: hooks
+   :END:
+#+begin_src emacs-lisp
+(add-hook 'ruby-mode-hook 'run-starter-kit-coding-hook)
+#+end_src
+
+#+begin_emacs-lisp
+;; (add-hook 'ruby-mode-hook 'idle-highlight)
+#+end_emacs-lisp
+
+** Flymake
+   :PROPERTIES:
+   :CUSTOM_ID: flymake
+   :END:
+
+#+begin_src emacs-lisp
+(eval-after-load 'ruby-mode
+  '(progn
+     (require 'flymake)
+
+     ;; Invoke ruby with '-c' to get syntax checking
+     (defun flymake-ruby-init ()
+       (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                          'flymake-create-temp-inplace))
+              (local-file (file-relative-name
+                           temp-file
+                           (file-name-directory buffer-file-name))))
+         (list "ruby" (list "-c" local-file))))
+
+     (push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
+     (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
+
+     (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3)
+           flymake-err-line-patterns)
+
+     (add-hook 'ruby-mode-hook
+               (lambda ()
+                 (when (and buffer-file-name
+                            (file-writable-p
+                             (file-name-directory buffer-file-name))
+                            (file-writable-p buffer-file-name))
+                   (local-set-key (kbd "C-c d")
+                                  'flymake-display-err-menu-for-current-line)
+                   (flymake-mode t))))))
+#+end_src
+
+** Rinari (Minor Mode for Ruby On Rails)
+   :PROPERTIES:
+   :CUSTOM_ID: rinari
+   :END:
+See [[http://rinari.rubyforge.org/][rinari.rubyforge]] for more information on rinari.
+
+#+begin_src emacs-lisp
+(setq rinari-major-modes
+      (list 'mumamo-after-change-major-mode-hook 'dired-mode-hook 'ruby-mode-hook
+	    'css-mode-hook 'yaml-mode-hook 'javascript-mode-hook))
+#+end_src
+* Footnotes
+
+[1] If you already have a directory at =~/.emacs.d= move it out of the
+way and put this there instead.
+
+[2] The emacs starter kit uses [[http://orgmode.org/][Org Mode]] to load embedded elisp code
+directly from literate Org-mode documents.
+This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
+
+# LocalWords:  ELPA Eshell Haskell Javascript
