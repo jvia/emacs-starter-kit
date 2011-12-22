@@ -1,7 +1,6 @@
 #+title: Emacs Configuration
-`#+options: toc:nil num:nil ^:nil
+#+options: toc:nil num:nil ^:nil
 #+startup: hidestars indent
-
 
 #+begin_quote
 Emacs outshines all other editing software in approximately the same
@@ -233,9 +232,11 @@ interested in the actual code implementing the starter kit.
   #+srcname: starter-kit-load-paths
   #+begin_src emacs-lisp
     (add-to-list 'load-path starter-kit-dir)
+    (add-to-list 'load-path (concat starter-kit-dir "src"))
     (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
     (setq package-user-dir (concat starter-kit-dir "elpa"))
     (setq custom-file (concat starter-kit-dir "custom.el"))
+
   #+end_src
 
 - Ubiquitous Packages which should be loaded on startup rather than
@@ -260,7 +261,7 @@ interested in the actual code implementing the starter kit.
                 ("gnu"         . "http://elpa.gnu.org/packages/")
                 ("marmalade"   . "http://marmalade-repo.org/packages/")))
         (package-initialize)
-        
+
         (defvar starter-kit-packages
           '(auctex
             cdlatex
@@ -282,13 +283,12 @@ interested in the actual code implementing the starter kit.
             yasnippet-bundle
             yas-jit)
           "Libraries that should be installed by default.")
-        
+
         (unless package-archive-contents
           (package-refresh-contents))
         (dolist (package starter-kit-packages)
           (unless (package-installed-p package)
             (package-install package)))
-        
   #+end_src
 
 - Functions for loading other parts of the starter kit
@@ -407,32 +407,38 @@ a lambda doesn't already exist in the list.
 Key Bindings.
 
 ** You know, like Readline.
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-M-h") 'backward-kill-word)
+  (global-set-key (kbd "C-M-h") 'backward-kill-word)
 #+end_src
 
 ** Align your code in a pretty way.
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-x \\") 'align-regexp)
+  (global-set-key (kbd "C-x \\") 'align-regexp)
 #+end_src
 
 ** Completion that uses many different methods to find options.
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "M-/") 'hippie-expand)
+  (global-set-key (kbd "M-/") 'hippie-expand)
 #+end_src
 
 ** Turn on the menu bar for exploring new modes
+
 #+begin_src emacs-lisp
-(global-set-key [f1] 'menu-bar-mode)
+  (global-set-key [f1] 'menu-bar-mode)
 #+end_src
 
 ** Font size
+
 #+begin_src emacs-lisp
-(define-key global-map (kbd "C-+") 'text-scale-increase)
-(define-key global-map (kbd "C--") 'text-scale-decrease)
+  (define-key global-map (kbd "C-+") 'text-scale-increase)
+  (define-key global-map (kbd "C--") 'text-scale-decrease)
 #+end_src
 
 ** Use regex searches by default.
+
 #+begin_src emacs-lisp
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
 (global-set-key (kbd "\C-r") 'isearch-backward-regexp)
@@ -441,16 +447,18 @@ Key Bindings.
 #+end_src
 
 ** File finding
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-x M-f") 'ido-find-file-other-window)
-(global-set-key (kbd "C-x C-p") 'find-file-at-point)
-(global-set-key (kbd "C-c y") 'bury-buffer)
-(global-set-key (kbd "C-c r") 'revert-buffer)
-(global-set-key (kbd "M-`") 'file-cache-minibuffer-complete)
-(global-set-key (kbd "C-x C-b") 'ibuffer)
+  (global-set-key (kbd "C-x M-f") 'ido-find-file-other-window)
+  (global-set-key (kbd "C-x C-p") 'find-file-at-point)
+  (global-set-key (kbd "C-c y")   'bury-buffer)
+  (global-set-key (kbd "C-c r")   'revert-buffer)
+  (global-set-key (kbd "M-`")     'file-cache-minibuffer-complete)
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 #+end_src
 
 ** Window switching. (C-x o goes to the next window)
+
 #+begin_src emacs-lisp
 (windmove-default-keybindings) ;; Shift+direction
 (global-set-key (kbd "C-x O") (lambda () (interactive) (other-window -1))) ;; back one
@@ -458,21 +466,25 @@ Key Bindings.
 #+end_src
 
 ** Indentation help
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-x ^") 'join-line)
+  (global-set-key (kbd "C-x ^") 'join-line)
 #+end_src
 
 ** If you want to be able to M-x without meta
+
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-x C-m") 'execute-extended-command)
+  (global-set-key (kbd "C-x C-m") 'execute-extended-command)
 #+end_src
 
 ** Help should search more than just commands
+
 #+begin_src emacs-lisp
   (global-set-key (kbd "C-h a") 'apropos)
 #+end_src
 
 ** Activate occur easily inside isearch
+
 #+begin_src emacs-lisp
   (define-key isearch-mode-map (kbd "C-o")
     (lambda () (interactive)
@@ -483,6 +495,7 @@ Key Bindings.
 #+end_src
 
 ** Org-mode
+
 Two global binding for Org-mode (see [[file:starter-kit-org.org][starter-kit-org]])
 
 The [[http://orgmode.org/manual/Agenda-Views.html#Agenda-Views][Org-mode agenda]] is good to have close at hand
@@ -498,6 +511,7 @@ globally for later insertion into an Org-mode buffer.  See
 #+end_src
 
 ** Rgrep
+
 Rgrep is infinitely useful in multi-file projects.
 
 (see [[elisp:(describe-function 'rgrep)]])
@@ -507,6 +521,7 @@ Rgrep is infinitely useful in multi-file projects.
 #+end_src
 
 * Miscellaneous
+
 Things that don't fit anywhere else.
 
 ** Color Themes
@@ -722,6 +737,56 @@ Set this to whatever browser you use e.g...
   (add-to-list 'auto-mode-alist '("\\.xml$" . nxml-mode))
 #+end_src
 
+** IBuffer stuff
+
+Organize the buffers into groups.
+#+begin_src emacs-lisp
+  (setq ibuffer-saved-filter-groups
+        (quote (("default"
+                 ("dired" (mode . dired-mode))
+                 ("erc"   (mode . erc-mode))
+                 ("org"   (mode . org-mode))
+                 ("latex" (mode . latex-mode))
+                 ("emacs" (or
+                           (name . "^\\*scratch\\*$")
+                           (name . "^\\*Messages\\*$")))
+                 ("gnus" (or
+                          (mode . message-mode)
+                          (mode . bbdb-mode)
+                          (mode . mail-mode)
+                          (mode . gnus-group-mode)
+                          (mode . gnus-summary-mode)
+                          (mode . gnus-article-mode)
+                          (name . "^\\.bbdb$")
+                          (name . "^\\.newsrc-dribble")))))))
+  
+  (add-hook 'ibuffer-mode-hook
+            (lambda ()
+              (ibuffer-switch-to-saved-filter-groups "default")))
+#+end_src
+
+Use a human readable size column
+#+begin_src emacs-lisp
+  ;; Use human readable Size column instead of original one
+  ;; (define-ibuffer-column size-h
+  ;;   (:name "Size" :inline t)
+  ;;   (cond
+  ;;    ((> (buffer-size) 1000) (format "%7.3fk" (/ (buffer-size) 1000.0)))
+  ;;    ((> (buffer-size) 1000000) (format "%7.3fM" (/ (buffer-size) 1000000.0)))
+  ;;    (t (format "%8d" (buffer-size)))))
+  
+  ;; ;; Modify the default ibuffer-formats
+  ;;   (setq ibuffer-formats
+  ;;         '((mark modified read-only " "
+  ;;                 (name 18 18 :left :elide)
+  ;;                 " "
+  ;;                 (size-h 9 -1 :right)
+  ;;                 " "
+  ;;                 (mode 16 16 :left :elide)
+  ;;                 " "
+  ;;                 filename-and-process)))
+  #+end_src
+
 * Registers
 
 Registers allow you to jump to a file or other location quickly. Use
@@ -734,6 +799,7 @@ You should add registers here for the files you edit most often.
 #+begin_src emacs-lisp :results silent
   (dolist
       (r `((?i (file . ,(concat starter-kit-dir "init.el")))
+           (?e (file . ,(concat starter-kit-dir "emacs.org")))
            (?I (file . ,(let* ((user (getenv "USER"))
                                (org (expand-file-name (concat user ".org") starter-kit-dir))
                                (el  (expand-file-name (concat user ".el") starter-kit-dir))
@@ -743,8 +809,10 @@ You should add registers here for the files you edit most often.
                            ((file-exists-p el)  el)
                            (t dir)))))
            (?s (file . ,(concat starter-kit-dir "starter-kit.org")))
-           (?r (file . ,(concat starter-kit-dir "starter-kit-registers.org")))))
+           (?r (file . ,(concat starter-kit-dir "starter-kit-registers.org")))
+           (?u (file . "~/Documents/postgrad/universities.org"))))
     (set-register (car r) (cadr r)))
+
 #+end_src
 * Yasnippet
 - [[http://code.google.com/p/yasnippet/][yasnippet]] is yet another snippet expansion system for Emacs.  It is
@@ -969,15 +1037,15 @@ back, =C-M-u= up, =C-M-d= down)
 
 #+begin_src emacs-lisp
   ;; (require 'clojure-mode)
-  
+
   ;; (add-hook 'clojure-mode-hook 'run-starter-kit-coding-hook)
-  
+
   ;; (font-lock-add-keywords 'clojure-mode
   ;;                         '(("(\\|)" . 'starter-kit-paren-face)))
-  
+
   ;; (define-key clojure-mode-map (kbd "C-c v") 'slime-eval-buffer)
   ;; (define-key clojure-mode-map (kbd "C-c C-v") 'slime-eval-buffer)
-  
+
   ;; (defface starter-kit-clojure-trace-face
   ;;    '((((class color) (background dark))
   ;;       (:foreground "grey50"))
@@ -985,9 +1053,9 @@ back, =C-M-u= up, =C-M-d= down)
   ;;       (:foreground "grey55")))
   ;;    "Face used to dim parentheses."
   ;;    :group 'starter-kit-faces)
-  
+
   ;; (setq starter-kit-clojure-trace-face 'starter-kit-clojure-trace-face)
-  
+
   ;; ;; This will make relevant lines stand out more in stack traces
   ;; (defun sldb-font-lock ()
   ;;   (font-lock-add-keywords nil
@@ -999,9 +1067,9 @@ back, =C-M-u= up, =C-M-d= down)
   ;;                              1 starter-kit-clojure-trace-face)
   ;;                             ("\\[\\([A-Z]+\\)\\]"
   ;;                              1 font-lock-function-name-face))))
-  
+
   ;; (add-hook 'sldb-mode-hook 'sldb-font-lock)
-  
+
   ;; (defun slime-jump-to-trace (&optional on)
   ;;   "Jump to the file/line that the current stack trace line references.
   ;; Only works with files in your project root's src/, not in dependencies."
@@ -1015,23 +1083,23 @@ back, =C-M-u= up, =C-M-d= down)
   ;;       (find-file (format "%s/src/%s.clj" project-root
   ;;                          (mapconcat 'identity ns-path "/")))
   ;;       (goto-line line))))
-  
+
   ;; (eval-after-load 'slime
   ;;   '(progn
   ;;      (defalias 'sldb-toggle-details 'slime-jump-to-trace)
   ;;      (defun sldb-prune-initial-frames (frames)
   ;;        "Show all stack trace lines by default."
   ;;        frames)))
-  
+
   ;; (eval-after-load 'find-file-in-project
   ;;   '(add-to-list 'ffip-patterns "*.clj"))
-  
+
   ;; ;; You might like this, but it's a bit disorienting at first:
   ;; (add-hook 'clojure-mode-hook 'turn-on-paredit)
-  
+
   ;; (defun clojure-project (path)
   ;;   "Setup classpaths for a clojure project and starts a new SLIME session.
-  
+
   ;; Kills existing SLIME session, if any."
   ;;   (interactive (list
   ;;                 (ido-read-directory-name
@@ -1056,7 +1124,7 @@ back, =C-M-u= up, =C-M-d= down)
   ;;                          slime-lisp-implementations)))
   ;;   (save-window-excursion
   ;;     (slime)))
-  
+
 #+end_src
 
 #+results:
@@ -1210,7 +1278,7 @@ the documentation for the Starter Kit to html.
 #+begin_src emacs-lisp :results silent
   ;; (unless (boundp 'org-publish-project-alist)
   ;;   (setq org-publish-project-alist nil))
-  
+
   ;; (let* ((this-dir (file-name-directory (or load-file-name buffer-file-name)))
   ;;        (org-export-htmlize-output-type 'css)
   ;;        (load-path (cons (expand-file-name "elpa" this-dir) load-path))
@@ -1245,18 +1313,48 @@ the documentation for the Starter Kit to html.
   ;;   ;; copy starter-kit.html to index.html
   ;;   (copy-file (expand-file-name "starter-kit.html" (expand-file-name "doc" this-dir))
   ;;              (expand-file-name "index.html" (expand-file-name "doc" this-dir))))
-  
+
 #+end_src
 
 ** Published Projects
+
+#+begin_src emacs-lisp
+  (setq org-publish-project-alist
+        '(("org-via"
+           ;; Path to your org files.
+           :base-directory "~/Sites/jeremiahvia.com/_org/"
+           :base-extension "org"
+           :exclude "md\\|markdown"
+
+           ;; Path to your Jekyll project.
+           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
+           :recursive t
+           :publishing-function org-publish-org-to-html
+           :headline-levels 4
+           :html-extension "html"
+           :body-only t ;; Only export section between <body> </body>
+           )
+
+          ("org-static-via"
+           :base-directory "~/Sites/jeremiahvia.com/_org/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php\\|ico"
+           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+
+          ;; Publish everything
+          ("via" :components ("org-via" "org-static-via"))))
+
+#+end_src
 * Python
 
 Support for the Python programming language.
 
 ** Use Python's python-mode.el instead of Emacs' python.el
-   :PROPERTIES:
-   :CUSTOM_ID: python
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: python
+:END:
 Replace the Python mode that comes with Emacs by the Python mode
 supplied by the Python distribution itself.
 #+begin_src emacs-lisp
@@ -1266,9 +1364,9 @@ supplied by the Python distribution itself.
 #+end_src
 
 ** Use IPython if =ipython= command is present
-   :PROPERTIES:
-   :CUSTOM_ID: ipython
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: ipython
+:END:
 If an =ipython= executable is on the path, then assume that IPython is
 the preferred method python evaluation.
 #+begin_src emacs-lisp
@@ -1278,9 +1376,9 @@ the preferred method python evaluation.
 #+end_src
 
 ** Use Cython mode
-   :PROPERTIES:
-   :CUSTOM_ID: cython
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: cython
+:END:
 #+begin_src emacs-lisp
   ;; (require 'cython-mode)
   ;; (add-to-list 'auto-mode-alist '("\\.pyx\\'" . cython-mode))
@@ -1308,9 +1406,9 @@ Support for the [[http://www.ruby-lang.org/en/][Ruby]] dynamic, open-source prog
 #+end_src
 
 ** Rake files are ruby, too, as are gemspecs.
-   :PROPERTIES:
-   :CUSTOM_ID: additional-file-extensions
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: additional-file-extensions
+:END:
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
 (add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
@@ -1318,17 +1416,17 @@ Support for the [[http://www.ruby-lang.org/en/][Ruby]] dynamic, open-source prog
 #+end_src
 
 ** We never want to edit Rubinius bytecode
-   :PROPERTIES:
-   :CUSTOM_ID: ignore-rubinius
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: ignore-rubinius
+:END:
 #+begin_src emacs-lisp
 (add-to-list 'completion-ignored-extensions ".rbc")
 #+end_src
 
 ** Rake
-   :PROPERTIES:
-   :CUSTOM_ID: rake
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: rake
+:END:
 
 #+begin_src emacs-lisp
 (defun pcomplete/rake ()
@@ -1340,8 +1438,8 @@ Support for the [[http://www.ruby-lang.org/en/][Ruby]] dynamic, open-source prog
 projects.  I know this is a hack to put all the logic in the
 exec-to-string command, but it works and seems fast"
    (delq nil (mapcar '(lambda(line)
-			(if (string-match "rake \\([^ ]+\\)" line) (match-string 1 line)))
-		     (split-string (shell-command-to-string "rake -T") "[\n]"))))
+                        (if (string-match "rake \\([^ ]+\\)" line) (match-string 1 line)))
+                     (split-string (shell-command-to-string "rake -T") "[\n]"))))
 
 (defun rake (task)
   (interactive (list (completing-read "Rake (default: default): "
@@ -1350,9 +1448,9 @@ exec-to-string command, but it works and seems fast"
 #+end_src
 
 ** Compilation
-   :PROPERTIES:
-   :CUSTOM_ID: compilation
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: compilation
+:END:
 Clear the compilation buffer between test runs.
 
 #+begin_src emacs-lisp
@@ -1367,9 +1465,9 @@ Clear the compilation buffer between test runs.
 #+end_src
 
 ** Hooks
-   :PROPERTIES:
-   :CUSTOM_ID: hooks
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: hooks
+:END:
 #+begin_src emacs-lisp
 (add-hook 'ruby-mode-hook 'run-starter-kit-coding-hook)
 #+end_src
@@ -1379,9 +1477,9 @@ Clear the compilation buffer between test runs.
 #+end_emacs-lisp
 
 ** Flymake
-   :PROPERTIES:
-   :CUSTOM_ID: flymake
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: flymake
+:END:
 
 #+begin_src emacs-lisp
 (eval-after-load 'ruby-mode
@@ -1415,15 +1513,237 @@ Clear the compilation buffer between test runs.
 #+end_src
 
 ** Rinari (Minor Mode for Ruby On Rails)
-   :PROPERTIES:
-   :CUSTOM_ID: rinari
-   :END:
+:PROPERTIES:
+:CUSTOM_ID: rinari
+:END:
 See [[http://rinari.rubyforge.org/][rinari.rubyforge]] for more information on rinari.
 
 #+begin_src emacs-lisp
 (setq rinari-major-modes
       (list 'mumamo-after-change-major-mode-hook 'dired-mode-hook 'ruby-mode-hook
-	    'css-mode-hook 'yaml-mode-hook 'javascript-mode-hook))
+            'css-mode-hook 'yaml-mode-hook 'javascript-mode-hook))
+#+end_src
+* Gnus
+
+Configuration for the notoriously difficult to configure [[http://www.gnus.org/][Gnus]] email
+client
+
+** IMAP
+:PROPERTIES:
+:CUSTOM_ID: imap
+:END:
+
+Based on the instructions at [[http://www.emacswiki.org/emacs/GnusGmail#toc2][emacswiki:GnusGmail]].
+
+to use this file:
+1) /personal information/ in this file (specifically in the code
+   blocks which will be tangled in the next step) globally replace
+   "your-name" with your gmail username, and "your-password" with your
+   gmail password.
+
+2) /tangle this file/ Run the =org-babel-tangle= command to extract
+   the code embedded in this file into a =starter-git-gnus-imap.el=
+   file which can be added to your configuration, and a =~/.authinfo=
+   file which will be used by gnus.
+
+3) /load this configuration/ If you have a recent version of Org-mode
+   (i.e. after 7.0) or are using the [[http://eschulte.github.com/emacs24-starter-kit/][literate Emacs Starter Kit]], then
+   this file can be loaded directly using the =org-babel-load-file=
+   function, or by placing it in your load path (if you're using the
+   starter kit).
+
+   Alternately ensure that the =gnus-gmail.el= file generated by the
+   previous step is loaded by your configuration.
+
+4) /fire up gnus/ This can be done with the command =M-x gnus=
+
+5) /view your mail/ After gnus boots up you will see the "Group
+   Buffer" (see [[http://www.gnu.org/software/emacs/manual/html_node/gnus/index.html#toc_Group-Buffer][Group-Buffer]]).  Each line is a mail "Group", hit
+   =SPACE= or =ENTER= on a group to view it's contents.  You should
+   see an "INBOX" group which contains the mail in your gmail account.
+   If not, you can jump to the "INBOX" group by
+     - pressing =j= for "jump"
+     - tab completing the name "INBOX"
+     - pressing =U= for "unkill" meaning this will now always be
+       displayed in your Group buffer when you have new mail
+
+6) /customize/ Gnus has unrivalled capacity for customization.  Once
+   your comfortable with basic usage, take some time to browse through
+   the very readable [[http://www.gnu.org/software/emacs/manual/html_node/gnus/index.html][Gnus Manual]] to learn untold tricks (see also
+   [[file:starter-kit-gnus.org::#customization][Starter-kit-gnus:Customizations]]).
+
+*** Saving mail locally
+
+Where your mail will be saved locally default value will be =~/gmail=.
+#+begin_src emacs-lisp
+  (require 'gnus)
+  (setq nnml-directory "~/.gmail")
+  (setq message-directory "~/.gmail")
+#+end_src
+
+All Gmail groups will be ignored by the default value of
+=gnus-ignored-newsgroups=, so let's change that default value.
+#+begin_src emacs-lisp
+  (setq gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\”]\”[#’()]")
+#+end_src
+
+Setup some default subscriptions
+#+begin_src emacs-lisp
+  (setq gnus-default-subscribed-newsgroups '("INBOX" "Comp/Robot/ROS" "Comp/Robot/robotics-worldwide"))
+#+end_src
+
+*** Getting mail
+
+Set Gmail as the primary source for incoming mail (Gnus can aggregate
+many email and/or newsgroup sources).
+#+begin_src emacs-lisp
+   (setq gnus-select-method
+         '(nnimap "gmail"
+                  (nnimap-address "imap.gmail.com")
+                  (nnimap-server-port 993)
+                  (nnimap-stream ssl)))
+#+end_src
+
+Place a line like the following in =~/.authinfo=
+#+begin_src fundamental :tangle ~/.authinfo
+  machine imap.gmail.com login your-name@gmail.com password your-password port 993
+#+end_src
+
+and make sure that no-one else can read it with
+#+begin_src sh
+  chmod 600 ~/.authinfo
+#+end_src
+
+*** Sending mail
+
+/Requirement/: gnus uses the [[http://en.wikipedia.org/wiki/STARTTLS][starttls]] tool for encrypted sending of
+email to the Gmail SMTP server.
+
+This is easily installed on modern Debian (including Ubuntu) systems
+with
+: apt-get install starttls
+or with brew on OSX
+: brew install gnutls
+
+The following configures gnus to use the Gmail SMTP server for sending
+email.
+#+begin_src emacs-lisp
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
+        smtpmail-auth-credentials     '(("smtp.gmail.com" 587 "jeremiah.via@gmail.com" nil))
+        smtpmail-default-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-server "smtp.gmail.com"
+        smtpmail-smtp-service 587)
+#+end_src
+
+If you don't want to be prompted for a password on every mail sent,
+you can add the following line to your =~/.authinfo=.
+#+begin_src fundamental :tangle ~/.authinfo
+  machine smtp.gmail.com login your-name@gmail.com your-password secret port 587
+#+end_src
+
+** Customization
+:PROPERTIES:
+:CUSTOM_ID: customization
+:END:
+
+Once gnus is installed and working, here are some recommended Gnus
+customization.
+
+*** BBDB
+:PROPERTIES:
+:CUSTOM_ID: bbdb
+:END:
+
+[[http://bbdb.sourceforge.net/][BBDB]] -- _The Insidious Big Brother Database_ is Emacs' contact manager
+which is very useful for keeping all of your contacts organized for
+use with gnus.
+
+#+begin_src emacs-lisp
+    ;;; bbdb
+  (add-to-list 'load-path (concat starter-kit-dir "src/bbdb-2.35/lisp"))
+  (add-to-list 'Info-default-directory-list (concat starter-kit-dir "src/bbdb-2.35/texinfo/bbdb.info"))
+  (require 'bbdb)
+  (require 'bbdb-autoloads)
+  (bbdb-initialize 'gnus 'message)
+  (setq
+   bbdb-file "~/.bbdb"
+   bbdb-offer-save 'auto
+   bbdb-notice-auto-save-file t
+   bbdb-expand-mail-aliases t
+   bbdb-canonicalize-redundant-nets-p t
+   bbdb-always-add-addresses t
+   bbdb-complete-name-allow-cycling t
+   )
+#+end_src
+
+*** More attractive Summary View
+:PROPERTIES:
+:CUSTOM_ID: pretty-summary
+:END:
+
+Thanks to Dan Davison.
+
+#+begin_src emacs-lisp
+  ;; http://groups.google.com/group/gnu.emacs.gnus/browse_thread/thread/a673a74356e7141f
+  (when window-system
+    (setq gnus-sum-thread-tree-indent "  ")
+    (setq gnus-sum-thread-tree-root "● ")
+    (setq gnus-sum-thread-tree-false-root "◯ ")
+    (setq gnus-sum-thread-tree-single-indent "◎ ")
+    (setq gnus-sum-thread-tree-vertical        "│")
+    (setq gnus-sum-thread-tree-leaf-with-other "├─► ")
+    (setq gnus-sum-thread-tree-single-leaf     "╰─► "))
+
+  (setq gnus-summary-line-format
+        (concat
+         ;; message status
+         "%0{%U%R%z%}"
+         ;; date received
+         "│" "%1{%d%}" "│"
+         ;; sender name
+         "  " "%4{%-20,20f%}" "  "
+         ;; message heading
+         "│"  " " "%1{%B%}" "%s\n"))
+
+  (setq gnus-summary-display-arrow t)
+#+end_src
+
+* ERC
+* System Specific
+** OSX
+*** Add the OSX paths
+
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (setq exec-path (append exec-path '("/usr/local/bin" "/usr/X11/bin" "/usr/texbin")))
+    (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin:/usr/X11/bin:/usr/texbin")))
+#+end_src
+
+*** Setup tex
+
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (setq TeX-view-program-selection
+          '((output-dvi "DVI Viewer")
+            (output-pdf "PDF Viewer")
+            (output-html "Google Chrome")))
+    (setq TeX-view-program-list
+          '(("DVI Viewer" "open %o")
+            ("PDF Viewer" "open %o")
+            ("Google Chrome" "open %o"))))
+#+end_src
+
+*** Miscellaneous
+
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    ;; allow pressing hash on osx
+    (global-set-key (kbd "M-3") "#")
+    ;; use aspell, not ispell
+    (setq-default ispell-program-name "aspell")
+    ;; may as well use it
+    (setq menu-bar-mode 1))
 #+end_src
 * Footnotes
 
@@ -1434,4 +1754,4 @@ way and put this there instead.
 directly from literate Org-mode documents.
 This is part of the [[file:starter-kit.org][Emacs Starter Kit]].
 
-# LocalWords:  ELPA Eshell Haskell Javascript
+# LocalWords:  ELPA Eshell Haskell Javascript Rgrep src kbd
