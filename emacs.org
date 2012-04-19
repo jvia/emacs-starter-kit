@@ -1,6 +1,6 @@
 #+title: Emacs Configuration
 #+options: toc:nil num:nil ^:nil
-#+startup: hidestars indent
+#+startup: hidestars indent odd
 
 #+begin_quote
 Emacs outshines all other editing software in approximately the same
@@ -28,7 +28,7 @@ The main advantage of this Emacs Starter Kit are
 
 The latest version is at http://github.com/eschulte/emacs24-starter-kit/
 
-** Learning
+*** Learning
 :PROPERTIES:
 :CUSTOM_ID: learning
 :END:
@@ -38,7 +38,7 @@ from within Emacs.
 
 The [[http://emacswiki.org][Emacs Wiki]] is also very handy.
 
-** Installation
+*** Installation
 :PROPERTIES:
 :CUSTOM_ID: installation
 :END:
@@ -79,7 +79,7 @@ Note that having a =~/.emacs= file might override the starter kit
 loading, so if you've having trouble loading it, make sure that file
 is not present.
 
-** Structure
+*** Structure
 :PROPERTIES:
 :CUSTOM_ID: structure
 :END:
@@ -91,7 +91,7 @@ configuration which should be generally useful, and goes on to load
 user-specific configuration files from the following locations
 mentioned in [[customizations]] immediately below.
 
-** Customization
+*** Customization
 :PROPERTIES:
 :CUSTOM_ID: customization
 :tangle:   no
@@ -190,7 +190,7 @@ general starter-kit updates without conflict.
    - read the following [[http://www.gnu.org/software/emacs/elisp/html_node/Key-Binding-Conventions.html][Key-Binding-Conventions]] before defining too
      many personal key bindings
 
-*** Optional starter kit packages
+* Optional starter kit packages
 The following customization packages are shipped with the starter kit
 but are not loaded by default.  If you have code which you find
 generally useful please submit it to the starter kit core!
@@ -206,7 +206,7 @@ generally useful please submit it to the starter kit core!
 - [[file:starter-kit-python.org][python]]
 - [[file:starter-kit-ruby.org][ruby]]
 
-** Emacs Lisp Package Archive
+*** Emacs Lisp Package Archive
 :PROPERTIES:
 :CUSTOM_ID: emacs-lisp-package-archive
 :END:
@@ -1074,116 +1074,12 @@ the documentation for the Starter Kit to html.
     (add-hook 'org-mode-hook #'yas/org-setup)
   #+end_src
 
-* Eshell
-
-[[http://www.emacswiki.org/emacs/CategoryEshell][Eshell]] is a great shell.
-
-#+begin_src emacs-lisp
-  (setq eshell-cmpl-cycle-completions nil
-        eshell-save-history-on-exit t
-        eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
-
-  (eval-after-load 'esh-opt
-    '(progn
-       (require 'em-cmpl)
-       (require 'em-prompt)
-       (require 'em-term)
-       ;; TODO: for some reason requiring this here breaks it, but
-       ;; requiring it after an eshell session is started works fine.
-       ;; (require 'eshell-vc)
-       (setenv "PAGER" "cat")
-       ; (set-face-attribute 'eshell-prompt nil :foreground "turquoise1")
-       (add-hook 'eshell-mode-hook ;; for some reason this needs to be a hook
-                 '(lambda () (define-key eshell-mode-map "\C-a" 'eshell-bol)))
-       (add-to-list 'eshell-visual-commands "ssh")
-       (add-to-list 'eshell-visual-commands "tail")
-       (add-to-list 'eshell-command-completions-alist
-                    '("gunzip" "gz\\'"))
-       (add-to-list 'eshell-command-completions-alist
-                    '("tar" "\\(\\.tar|\\.tgz\\|\\.tar\\.gz\\)\\'"))
-       (add-to-list 'eshell-output-filter-functions 'eshell-handle-ansi-color)))
-#+end_src
-
-The =eshell= directory holds alias definitions and history
-information.  It is much like a =.bashrc= file for those who are
-familiar with bash.  This set the value of =eshell-directory-name= to
-point to the =eshell= directory in this directory.  The =alias= file
-is pre-populated with some generally applicable aliases.
-
-#+begin_src emacs-lisp
-  (setq eshell-directory-name
-        (expand-file-name "./" (expand-file-name "eshell" starter-kit-dir)))
-#+end_src
-
-* Haskell
-:PROPERTIES:
-:results:  silent
-:END:
-
-Support for editing Haskell
-
-pretty lambdas in Haskell code
-#+begin_src emacs-lisp
-  (defun pretty-lambdas-haskell ()
-    (font-lock-add-keywords
-     nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      ,(make-char 'greek-iso8859-7 107))
-                      nil))))))
-#+end_src
-
-Haskell mode hook
-#+begin_src emacs-lisp
-  (add-hook 'haskell-mode-hook 'run-starter-kit-coding-hook)
-  (when (window-system)
-    (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
-#+end_src
-* Javascript
-
-Java-script Helpers
-
-#+begin_src emacs-lisp
-(font-lock-add-keywords
- 'espresso-mode `(("\\(function *\\)("
-                   (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                             "ƒ")
-                             nil)))))
-#+end_src
-
-#+begin_src emacs-lisp
-(font-lock-add-keywords 'espresso-mode
-                        '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
-                           1 font-lock-warning-face t)))
-#+end_src
-
-#+begin_src emacs-lisp
-(autoload 'espresso-mode "espresso" "Start espresso-mode" t)
-(add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
-(add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
-(add-hook 'espresso-mode-hook 'moz-minor-mode)
-(add-hook 'espresso-mode-hook 'turn-on-paredit)
-(add-hook 'espresso-mode-hook 'run-starter-kit-coding-hook)
-;; (add-hook 'espresso-mode-hook 'idle-highlight)
-(setq espresso-indent-level 2)
-#+end_src
-
-#+begin_src emacs-lisp
-(defun starter-kit-pp-json ()
-  "Pretty-print the json object following point."
-  (interactive)
-  (require 'json)
-  (let ((json-object (save-excursion (json-read))))
-    (switch-to-buffer "*json*")
-    (delete-region (point-min) (point-max))
-    (insert (pp json-object))
-    (goto-char (point-min))))
-#+end_src
-
-* Lisp
+* Languages
+*** Lisp
 Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Scheme][Scheme]],
 [[* Common Lisp][Common Lisp]], and [[* Clojure][Clojure]].
 
-** Define keys
+***** Define keys
 :PROPERTIES:
 :CUSTOM_ID: keys
 :END:
@@ -1196,7 +1092,7 @@ Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Sc
   ;; (define-key lisp-mode-shared-map (kbd "C-c v") 'eval-buffer)
 #+end_src
 
-** Paredit
+***** Paredit
 :PROPERTIES:
 :CUSTOM_ID: paredit
 :END:
@@ -1214,7 +1110,7 @@ back, =C-M-u= up, =C-M-d= down)
 : ;;      ;; Not sure why paredit behaves this way with comments; it's annoying
 : ;;   '(define-key paredit-mode-map (kbd ";")   'self-insert-command))
 
-** Non-obtrusive parenthesis faces
+***** Non-obtrusive parenthesis faces
 :PROPERTIES:
 :CUSTOM_ID: parenthesis-faces
 :END:
@@ -1228,7 +1124,7 @@ back, =C-M-u= up, =C-M-d= down)
    :group 'starter-kit-faces)
 #+end_src
 
-** Emacs Lisp
+***** Emacs Lisp
 :PROPERTIES:
 :CUSTOM_ID: emacs-lisp
 :END:
@@ -1253,7 +1149,7 @@ back, =C-M-u= up, =C-M-d= down)
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
 
-** Clojure
+***** Clojure
 :PROPERTIES:
 :CUSTOM_ID: clojure
 :END:
@@ -1363,7 +1259,7 @@ pretty \lambda's in clojure
   ;;                                nil))))))
 #+end_src
 
-** Scheme
+***** Scheme
 :PROPERTIES:
 :CUSTOM_ID: scheme
 :END:
@@ -1375,7 +1271,7 @@ pretty \lambda's in clojure
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
 
-** Common Lisp
+***** Common Lisp
 :PROPERTIES:
 :CUSTOM_ID: common-lisp
 :END:
@@ -1387,7 +1283,30 @@ pretty \lambda's in clojure
 (font-lock-add-keywords 'lisp-mode
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
-* OCAML
+*** Haskell
+:PROPERTIES:
+:results:  silent
+:END:
+
+Support for editing Haskell
+
+pretty lambdas in Haskell code
+#+begin_src emacs-lisp
+  (defun pretty-lambdas-haskell ()
+    (font-lock-add-keywords
+     nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
+            (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                      ,(make-char 'greek-iso8859-7 107))
+                      nil))))))
+#+end_src
+
+Haskell mode hook
+#+begin_src emacs-lisp
+  (add-hook 'haskell-mode-hook 'run-starter-kit-coding-hook)
+  (when (window-system)
+    (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
+#+end_src
+*** OCAML
 
 Set up Tuareg mode
 
@@ -1419,11 +1338,52 @@ Set up Tuareg mode
 ;;(setq global-font-lock-mode t)
 ;;(setq global-auto-revert-mode t)t)
 #+end_src
-* Python
+*** Javascript
+
+Java-script Helpers
+
+#+begin_src emacs-lisp
+(font-lock-add-keywords
+ 'espresso-mode `(("\\(function *\\)("
+                   (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                             "ƒ")
+                             nil)))))
+#+end_src
+
+#+begin_src emacs-lisp
+(font-lock-add-keywords 'espresso-mode
+                        '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
+                           1 font-lock-warning-face t)))
+#+end_src
+
+#+begin_src emacs-lisp
+(autoload 'espresso-mode "espresso" "Start espresso-mode" t)
+(add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
+(add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
+(add-hook 'espresso-mode-hook 'moz-minor-mode)
+(add-hook 'espresso-mode-hook 'turn-on-paredit)
+(add-hook 'espresso-mode-hook 'run-starter-kit-coding-hook)
+;; (add-hook 'espresso-mode-hook 'idle-highlight)
+(setq espresso-indent-level 2)
+#+end_src
+
+#+begin_src emacs-lisp
+(defun starter-kit-pp-json ()
+  "Pretty-print the json object following point."
+  (interactive)
+  (require 'json)
+  (let ((json-object (save-excursion (json-read))))
+    (switch-to-buffer "*json*")
+    (delete-region (point-min) (point-max))
+    (insert (pp json-object))
+    (goto-char (point-min))))
+#+end_src
+
+*** Python
 
 Support for the Python programming language.
 
-** Use Python's python-mode.el instead of Emacs' python.el
+***** Use Python's python-mode.el instead of Emacs' python.el
 :PROPERTIES:
 :CUSTOM_ID: python
 :END:
@@ -1435,7 +1395,7 @@ supplied by the Python distribution itself.
 (add-to-list 'interpreter-mode-alist '("python" . python-mode))
 #+end_src
 
-** Use IPython if =ipython= command is present
+***** Use IPython if =ipython= command is present
 :PROPERTIES:
 :CUSTOM_ID: ipython
 :END:
@@ -1447,7 +1407,7 @@ the preferred method python evaluation.
   ;;  (setq org-babel-python-mode 'python-mode))
 #+end_src
 
-** Use Cython mode
+***** Use Cython mode
 :PROPERTIES:
 :CUSTOM_ID: cython
 :END:
@@ -1457,144 +1417,47 @@ the preferred method python evaluation.
   ;; (add-to-list 'auto-mode-alist '("\\.pxd\\'" . cython-mode))
   ;; (add-to-list 'auto-mode-alist '("\\.pxi\\'" . cython-mode))
 #+end_src
-* Ruby
+* Eshell
 
-Support for the [[http://www.ruby-lang.org/en/][Ruby]] dynamic, open-source programming language.
-
-#+begin_src emacs-lisp
-(eval-after-load 'ruby-mode
-  '(progn
-     ;; work around possible elpa bug
-     (ignore-errors (require 'ruby-compilation))
-     (setq ruby-use-encoding-map nil)
-     (add-hook 'ruby-mode-hook 'inf-ruby-keys)
-     (define-key ruby-mode-map (kbd "RET") 'reindent-then-newline-and-indent)
-     (define-key ruby-mode-map (kbd "C-M-h") 'backward-kill-word)
-     (define-key ruby-mode-map (kbd "C-c l") "lambda")))
-#+end_src
+[[http://www.emacswiki.org/emacs/CategoryEshell][Eshell]] is a great shell.
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-h r") 'ri)
+  (setq eshell-cmpl-cycle-completions nil
+        eshell-save-history-on-exit t
+        eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
+
+  (eval-after-load 'esh-opt
+    '(progn
+       (require 'em-cmpl)
+       (require 'em-prompt)
+       (require 'em-term)
+       ;; TODO: for some reason requiring this here breaks it, but
+       ;; requiring it after an eshell session is started works fine.
+       ;; (require 'eshell-vc)
+       (setenv "PAGER" "cat")
+       ; (set-face-attribute 'eshell-prompt nil :foreground "turquoise1")
+       (add-hook 'eshell-mode-hook ;; for some reason this needs to be a hook
+                 '(lambda () (define-key eshell-mode-map "\C-a" 'eshell-bol)))
+       (add-to-list 'eshell-visual-commands "ssh")
+       (add-to-list 'eshell-visual-commands "tail")
+       (add-to-list 'eshell-command-completions-alist
+                    '("gunzip" "gz\\'"))
+       (add-to-list 'eshell-command-completions-alist
+                    '("tar" "\\(\\.tar|\\.tgz\\|\\.tar\\.gz\\)\\'"))
+       (add-to-list 'eshell-output-filter-functions 'eshell-handle-ansi-color)))
 #+end_src
 
-** Rake files are ruby, too, as are gemspecs.
-:PROPERTIES:
-:CUSTOM_ID: additional-file-extensions
-:END:
-#+begin_src emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.rake$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
-(add-to-list 'auto-mode-alist '("\\.gemspec$" . ruby-mode))
-#+end_src
-
-** We never want to edit Rubinius bytecode
-:PROPERTIES:
-:CUSTOM_ID: ignore-rubinius
-:END:
-#+begin_src emacs-lisp
-(add-to-list 'completion-ignored-extensions ".rbc")
-#+end_src
-
-** Rake
-:PROPERTIES:
-:CUSTOM_ID: rake
-:END:
-
-#+begin_src emacs-lisp
-(defun pcomplete/rake ()
-  "Completion rules for the `ssh' command."
-  (pcomplete-here (pcmpl-rake-tasks)))
-
-(defun pcmpl-rake-tasks ()
-   "Return a list of all the rake tasks defined in the current
-projects.  I know this is a hack to put all the logic in the
-exec-to-string command, but it works and seems fast"
-   (delq nil (mapcar '(lambda(line)
-                        (if (string-match "rake \\([^ ]+\\)" line) (match-string 1 line)))
-                     (split-string (shell-command-to-string "rake -T") "[\n]"))))
-
-(defun rake (task)
-  (interactive (list (completing-read "Rake (default: default): "
-                                      (pcmpl-rake-tasks))))
-  (shell-command-to-string (concat "rake " (if (= 0 (length task)) "default" task))))
-#+end_src
-
-** Compilation
-:PROPERTIES:
-:CUSTOM_ID: compilation
-:END:
-Clear the compilation buffer between test runs.
+The =eshell= directory holds alias definitions and history
+information.  It is much like a =.bashrc= file for those who are
+familiar with bash.  This set the value of =eshell-directory-name= to
+point to the =eshell= directory in this directory.  The =alias= file
+is pre-populated with some generally applicable aliases.
 
 #+begin_src emacs-lisp
-(eval-after-load 'ruby-compilation
-  '(progn
-     (defadvice ruby-do-run-w/compilation (before kill-buffer (name cmdlist))
-       (let ((comp-buffer-name (format "*%s*" name)))
-         (when (get-buffer comp-buffer-name)
-           (with-current-buffer comp-buffer-name
-             (delete-region (point-min) (point-max))))))
-     (ad-activate 'ruby-do-run-w/compilation)))
+  (setq eshell-directory-name
+        (expand-file-name "./" (expand-file-name "eshell" starter-kit-dir)))
 #+end_src
 
-** Hooks
-:PROPERTIES:
-:CUSTOM_ID: hooks
-:END:
-#+begin_src emacs-lisp
-(add-hook 'ruby-mode-hook 'run-starter-kit-coding-hook)
-#+end_src
-
-#+begin_emacs-lisp
-;; (add-hook 'ruby-mode-hook 'idle-highlight)
-#+end_emacs-lisp
-
-** Flymake
-:PROPERTIES:
-:CUSTOM_ID: flymake
-:END:
-
-#+begin_src emacs-lisp
-(eval-after-load 'ruby-mode
-  '(progn
-     (require 'flymake)
-
-     ;; Invoke ruby with '-c' to get syntax checking
-     (defun flymake-ruby-init ()
-       (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                          'flymake-create-temp-inplace))
-              (local-file (file-relative-name
-                           temp-file
-                           (file-name-directory buffer-file-name))))
-         (list "ruby" (list "-c" local-file))))
-
-     (push '(".+\\.rb$" flymake-ruby-init) flymake-allowed-file-name-masks)
-     (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
-
-     (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3)
-           flymake-err-line-patterns)
-
-     (add-hook 'ruby-mode-hook
-               (lambda ()
-                 (when (and buffer-file-name
-                            (file-writable-p
-                             (file-name-directory buffer-file-name))
-                            (file-writable-p buffer-file-name))
-                   (local-set-key (kbd "C-c d")
-                                  'flymake-display-err-menu-for-current-line)
-                   (flymake-mode t))))))
-#+end_src
-
-** Rinari (Minor Mode for Ruby On Rails)
-:PROPERTIES:
-:CUSTOM_ID: rinari
-:END:
-See [[http://rinari.rubyforge.org/][rinari.rubyforge]] for more information on rinari.
-
-#+begin_src emacs-lisp
-(setq rinari-major-modes
-      (list 'mumamo-after-change-major-mode-hook 'dired-mode-hook 'ruby-mode-hook
-            'css-mode-hook 'yaml-mode-hook 'javascript-mode-hook))
-#+end_src
 * Gnus
 
 Configuration for the notoriously difficult to configure [[http://www.gnus.org/][Gnus]] email
