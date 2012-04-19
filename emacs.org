@@ -236,7 +236,6 @@ interested in the actual code implementing the starter kit.
     (setq autoload-file (concat starter-kit-dir "loaddefs.el"))
     (setq package-user-dir (concat starter-kit-dir "elpa"))
     (setq custom-file (concat starter-kit-dir "custom.el"))
-
   #+end_src
 
 - Ubiquitous Packages which should be loaded on startup rather than
@@ -256,39 +255,43 @@ interested in the actual code implementing the starter kit.
 - ELPA archive repositories and two packages to install by default.
 
   #+begin_src emacs-lisp
-        (setq package-archives
-              '(("original"    . "http://tromey.com/elpa/")
-                ("gnu"         . "http://elpa.gnu.org/packages/")
-                ("marmalade"   . "http://marmalade-repo.org/packages/")))
-        (package-initialize)
+    (setq package-archives
+          '(("original"    . "http://tromey.com/elpa/")
+            ("gnu"         . "http://elpa.gnu.org/packages/")
+            ("marmalade"   . "http://marmalade-repo.org/packages/")))
+    (package-initialize)
 
-        (defvar starter-kit-packages
-          '(auctex
-            cdlatex
-            color-theme
-            color-theme-sanityinc-solarized
-            ctags
-            htmlize
-            gnuplot
-            idle-highlight
-            markdown-mode
-            org
-            python-mode
-            starter-kit
-            starter-kit-bindings
-            starter-kit-lisp
-            synonyms
-            yaml-mode
-            yasnippet
-            yasnippet-bundle
-            yas-jit)
-          "Libraries that should be installed by default.")
+    ;; Bham proxy
+    (setq url-proxy-services '(("http" . "webcache.cs.bham.ac.uk:3128")
+                               ("https" . "webcache.cs.bham.ac.uk:3128")))
 
-        (unless package-archive-contents
-          (package-refresh-contents))
-        (dolist (package starter-kit-packages)
-          (unless (package-installed-p package)
-            (package-install package)))
+    (defvar starter-kit-packages
+      '(auctex
+        cdlatex
+        color-theme
+        color-theme-sanityinc-solarized
+        ctags
+        htmlize
+        gnuplot
+        idle-highlight
+        markdown-mode
+        org
+        python-mode
+        starter-kit
+        starter-kit-bindings
+        starter-kit-lisp
+        synonyms
+        yaml-mode
+        yasnippet
+        yasnippet-bundle
+        yas-jit)
+      "Libraries that should be installed by default.")
+
+    (unless package-archive-contents
+      (package-refresh-contents))
+    (dolist (package starter-kit-packages)
+      (unless (package-installed-p package)
+        (package-install package)))
   #+end_src
 
 - Functions for loading other parts of the starter kit
@@ -519,7 +522,6 @@ Rgrep is infinitely useful in multi-file projects.
 #+begin_src emacs-lisp
   (define-key global-map "\C-x\C-r" 'rgrep)
 #+end_src
-
 * Miscellaneous
 
 Things that don't fit anywhere else.
@@ -691,9 +693,10 @@ let them live in the =backups/= directory inside of the starter kit.
 
 #+srcname: starter-kit-window-view-stuff-recommended
 #+begin_src emacs-lisp
-(when window-system
-  (tooltip-mode -1)
-  (tool-bar-mode -1))
+  (setq cua-mode -1)
+  (when window-system
+    (tooltip-mode -1)
+    (tool-bar-mode -1))
 #+end_src
 
 ** No Menu Bar                                                       :visual:
@@ -743,23 +746,26 @@ Organize the buffers into groups.
 #+begin_src emacs-lisp
   (setq ibuffer-saved-filter-groups
         (quote (("default"
-                 ("dired" (mode . dired-mode))
                  ("erc"   (mode . erc-mode))
                  ("org"   (mode . org-mode))
-                 ("latex" (mode . latex-mode))
+                 ("latex" (or
+                           (mode . latex-mode)
+                           (mode . bibtex-mode)))
                  ("emacs" (or
                            (name . "^\\*scratch\\*$")
                            (name . "^\\*Messages\\*$")))
-                 ("gnus" (or
-                          (mode . message-mode)
-                          (mode . bbdb-mode)
-                          (mode . mail-mode)
-                          (mode . gnus-group-mode)
-                          (mode . gnus-summary-mode)
-                          (mode . gnus-article-mode)
-                          (name . "^\\.bbdb$")
-                          (name . "^\\.newsrc-dribble")))))))
-  
+                 ("dired" (mode . dired-mode))
+                  ("gnus" (or
+                           (mode . message-mode)
+                           (mode . bbdb-mode)
+                           (mode . mail-mode)
+                           (mode . gnus-group-mode)
+                           (mode . gnus-summary-mode)
+                           (mode . gnus-article-mode)
+                           (name . "^\\.bbdb$")
+                           (name . "^\\.newsrc-dribble")))
+                 ))))
+
   (add-hook 'ibuffer-mode-hook
             (lambda ()
               (ibuffer-switch-to-saved-filter-groups "default")))
@@ -774,7 +780,7 @@ Use a human readable size column
   ;;    ((> (buffer-size) 1000) (format "%7.3fk" (/ (buffer-size) 1000.0)))
   ;;    ((> (buffer-size) 1000000) (format "%7.3fM" (/ (buffer-size) 1000000.0)))
   ;;    (t (format "%8d" (buffer-size)))))
-  
+
   ;; ;; Modify the default ibuffer-formats
   ;;   (setq ibuffer-formats
   ;;         '((mark modified read-only " "
@@ -785,8 +791,7 @@ Use a human readable size column
   ;;                 (mode 16 16 :left :elide)
   ;;                 " "
   ;;                 filename-and-process)))
-  #+end_src
-
+#+end_src
 * Registers
 
 Registers allow you to jump to a file or other location quickly. Use
@@ -800,20 +805,238 @@ You should add registers here for the files you edit most often.
   (dolist
       (r `((?i (file . ,(concat starter-kit-dir "init.el")))
            (?e (file . ,(concat starter-kit-dir "emacs.org")))
-           (?I (file . ,(let* ((user (getenv "USER"))
-                               (org (expand-file-name (concat user ".org") starter-kit-dir))
-                               (el  (expand-file-name (concat user ".el") starter-kit-dir))
-                               (dir (expand-file-name user starter-kit-dir)))
-                          (cond
-                           ((file-exists-p org) org)
-                           ((file-exists-p el)  el)
-                           (t dir)))))
-           (?s (file . ,(concat starter-kit-dir "starter-kit.org")))
-           (?r (file . ,(concat starter-kit-dir "starter-kit-registers.org")))
-           (?u (file . "~/Documents/postgrad/universities.org"))))
+           (?u (file . "~/Documents/postgrad/universities.org"))
+           (?q (file . "~/Documents/org/quotes.org"))
+           (?b (file . "~/Documents/org/buy.org"))
+           (?t (file . "~/org/todo.org"))))
     (set-register (car r) (cadr r)))
 
+  ;; (?I (file . ,(let* ((user (getenv "USER"))
+  ;;      (org (expand-file-name (concat user ".org") starter-kit-dir))
+  ;;      (el  (expand-file-name (concat user ".el") starter-kit-dir))
+  ;;      (dir (expand-file-name user starter-kit-dir)))
+  ;; (cond
+  ;;  ((file-exists-p org) org)
+  ;;  ((file-exists-p el)  el)
+  ;;  (t dir)))))
+
 #+end_src
+
+* Org Mode
+
+Configuration for the eminently useful [[http://orgmode.org/][Org Mode]].
+
+Org-mode is for keeping notes, maintaining ToDo lists, doing project
+planning, and authoring with a fast and effective plain-text system.
+Org Mode can be used as a very simple folding outliner or as a complex
+GTD system or tool for reproducible research and literate programming.
+
+For more information on org-mode check out [[http://orgmode.org/worg/][worg]], a large Org-mode wiki
+which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
+
+** Org-Mode Hook -- Keybindings
+:PROPERTIES:
+:CUSTOM_ID: keybindings
+:END:
+
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (local-set-key "\M-\C-n" 'outline-next-visible-heading)
+              (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
+              (local-set-key "\M-\C-u" 'outline-up-heading)
+              ;; table
+              (local-set-key "\M-\C-w" 'org-table-copy-region)
+              (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
+              (local-set-key "\M-\C-l" 'org-table-sort-lines)
+              ;; display images
+              (local-set-key "\M-I" 'org-toggle-iimage-in-org)))
+#+end_src
+
+** Speed keys
+:PROPERTIES:
+:CUSTOM_ID: speed-keys
+:END:
+
+Speed commands enable single-letter commands in Org-mode files when
+the point is at the beginning of a headline, or at the beginning of a
+code block.
+
+See the `=org-speed-commands-default=' variable for a list of the keys
+and commands enabled at the beginning of headlines.  All code blocks
+are available at the beginning of a code block, the following key
+sequence =C-c C-v h= (bound to `=org-babel-describe-bindings=') will
+display a list of the code blocks commands and their related keys.
+
+#+begin_src emacs-lisp
+  (setq org-use-speed-commands t)
+#+end_src
+
+** Code blocks
+:PROPERTIES:
+:CUSTOM_ID: babel
+:END:
+
+This activates a number of widely used languages, you are encouraged
+to activate more languages using the customize interface for the
+`=org-babel-load-languages=' variable, or with an elisp form like the
+one below.  The customize interface of `=org-babel-load-languages='
+contains an up to date list of the currently supported languages.
+
+#+begin_src emacs-lisp :tangle yes
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (sh . t)
+     (latex . t)
+     (ditaa . t)))
+#+end_src
+
+You are encouraged to add the following to your personal configuration
+although it is not added by default as a security precaution.
+
+#+begin_src emacs-lisp :tangle no
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** Code block fontification
+:PROPERTIES:
+:CUSTOM_ID: code-block-fontification
+:END:
+
+The following displays the contents of code blocks in Org-mode files
+using the major-mode of the code.  It also changes the behavior of
+=TAB= to as if it were used in the appropriate major mode.  This means
+that reading and editing code form inside of your Org-mode files is
+much more like reading and editing of code using its major mode.
+
+#+begin_src emacs-lisp
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+#+end_src
+
+** The Library of Babel
+:PROPERTIES:
+:CUSTOM_ID: library-of-babel
+:END:
+
+The library of babel contains makes many useful functions available
+for use by code blocks in *any* emacs file.  See the actual
+=library-of-babel.org= (located in the Org-mode =contrib/babel=
+directory) file for information on the functions, and see
+[[http://orgmode.org/worg/org-contrib/babel/intro.php#library-of-babel][worg:library-of-babel]] for more usage information.
+
+Code blocks can be loaded into the library of babel from any Org-mode
+file using the `org-babel-lob-ingest' function.
+
+This file is used to publish the starter kit documentation to =.html=
+in the =doc/= directory.
+
+This code defines the =starter-kit-project= which is used to publish
+the documentation for the Starter Kit to html.
+
+#+begin_src emacs-lisp :results silent
+  ;; (unless (boundp 'org-publish-project-alist)
+  ;;   (setq org-publish-project-alist nil))
+
+  ;; (let* ((this-dir (file-name-directory (or load-file-name buffer-file-name)))
+  ;;        (org-export-htmlize-output-type 'css)
+  ;;        (load-path (cons (expand-file-name "elpa" this-dir) load-path))
+  ;;        (package-archives '(("original"    . "http://tromey.com/elpa/"))))
+  ;;   ;; load up htmlize
+  ;;   (package-initialize)
+  ;;   (let ((package 'htmlize))
+  ;;     (unless (or (member package package-activated-list)
+  ;;                 (functionp package))
+  ;;       (package-install package)))
+  ;;   (require 'htmlize)
+  ;;   (org-export-htmlize-generate-css)
+  ;;   ;; define the org-publish-project for the starter kit
+  ;;   (add-to-list
+  ;;    'org-publish-project-alist
+  ;;    `("starter-kit-documentation"
+  ;;      :base-directory ,this-dir
+  ;;      :base-extension "org"
+  ;;      ;; :style "<link rel=\"stylesheet\" href=\"emacs.css\" type=\"text/css\"/>
+  ;;      ;;         <style type=\"text/css\">
+  ;;      ;;           pre{background:#232323; color:#E6E1DC; padding:1em 1em 0 1em;}
+  ;;      ;;           code{font-size:10pt; color:#353535;}
+  ;;      ;;          .outline-text-2{margin-left: 1em;}
+  ;;      ;;          .outline-text-3{margin-left: 2em;}
+  ;;      ;;          .outline-text-3{margin-left: 3em;}
+  ;;      ;;        </style>"
+  ;;      :publishing-directory ,(expand-file-name "doc" this-dir)
+  ;;      :index-filename "starter-kit.org"
+  ;;      :html-postamble nil))
+  ;;   ;; publish the starter kit
+  ;;   (org-publish-project "starter-kit-documentation" 'force)
+  ;;   ;; copy starter-kit.html to index.html
+  ;;   (copy-file (expand-file-name "starter-kit.html" (expand-file-name "doc" this-dir))
+  ;;              (expand-file-name "index.html" (expand-file-name "doc" this-dir))))
+
+#+end_src
+
+** Published Projects
+*** Personal Site
+#+begin_src emacs-lisp
+  (setq org-publish-project-alist
+        '(("org-via"
+           ;; Path to your org files.
+           :base-directory "~/Sites/jeremiahvia.com/_org/"
+           :base-extension "org"
+           :exclude "md\\|markdown"
+
+           ;; Path to your Jekyll project.
+           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
+           :recursive t
+           :publishing-function org-publish-org-to-html
+           :headline-levels 4
+           :html-extension "html"
+           :body-only t ;; Only export section between <body> </body>
+           )
+
+          ("org-static-via"
+           :base-directory "~/Sites/jeremiahvia.com/_org/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php\\|ico"
+           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+
+          ;; Publish everything
+          ("via" :components ("org-via" "org-static-via"))))
+#+end_src
+** Research
+
+#+BEGIN_SRC emacs-lisp
+  (require 'org-latex)
+  (setq org-export-latex-listings t)
+  (add-to-list 'org-export-latex-packages-alist '("" "listings"))
+  (add-to-list 'org-export-latex-packages-alist '("" "color"))
+
+  (setq-default TeX-master t)
+  (setq reftex-default-bibliography
+        (quote
+         ("~/Workspace/fyp/docs/dissertation/references.bib")))
+#+END_SRC
+
+** Agenda
+
+#+begin_src emacs-lisp
+    (setq org-agenda-files (quote ("~/org"
+                                   "~/org/tufts"
+                                   "~/bham/3/revision.org")))
+    ;; Disable C-c [ and C-c ] in org-mode
+    (add-hook 'org-mode-hook
+              (lambda ()
+                ;; Undefine C-c [ and C-c ] since this breaks my
+                ;; org-agenda files when directories are include It
+                ;; expands the files in the directories individually
+                (org-defkey org-mode-map "\C-c["    'undefined)
+                (org-defkey org-mode-map "\C-c]"    'undefined))
+              'append)
+#+end_src
+
 * Yasnippet
 - [[http://code.google.com/p/yasnippet/][yasnippet]] is yet another snippet expansion system for Emacs.  It is
   inspired by TextMate's templating syntax.
@@ -1164,188 +1387,37 @@ pretty \lambda's in clojure
 (font-lock-add-keywords 'lisp-mode
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
-* Org Mode
+* OCAML
 
-Configuration for the eminently useful [[http://orgmode.org/][Org Mode]].
-
-Org-mode is for keeping notes, maintaining ToDo lists, doing project
-planning, and authoring with a fast and effective plain-text system.
-Org Mode can be used as a very simple folding outliner or as a complex
-GTD system or tool for reproducible research and literate programming.
-
-For more information on org-mode check out [[http://orgmode.org/worg/][worg]], a large Org-mode wiki
-which is also *implemented using* Org-mode and [[http://git-scm.com/][git]].
-
-** Org-Mode Hook -- Keybindings
-:PROPERTIES:
-:CUSTOM_ID: keybindings
-:END:
+Set up Tuareg mode
 
 #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-set-key "\M-\C-n" 'outline-next-visible-heading)
-              (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
-              (local-set-key "\M-\C-u" 'outline-up-heading)
-              ;; table
-              (local-set-key "\M-\C-w" 'org-table-copy-region)
-              (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
-              (local-set-key "\M-\C-l" 'org-table-sort-lines)
-              ;; display images
-              (local-set-key "\M-I" 'org-toggle-iimage-in-org)))
-#+end_src
-
-** Speed keys
-:PROPERTIES:
-:CUSTOM_ID: speed-keys
-:END:
-
-Speed commands enable single-letter commands in Org-mode files when
-the point is at the beginning of a headline, or at the beginning of a
-code block.
-
-See the `=org-speed-commands-default=' variable for a list of the keys
-and commands enabled at the beginning of headlines.  All code blocks
-are available at the beginning of a code block, the following key
-sequence =C-c C-v h= (bound to `=org-babel-describe-bindings=') will
-display a list of the code blocks commands and their related keys.
-
-#+begin_src emacs-lisp
-  (setq org-use-speed-commands t)
-#+end_src
-
-** Code blocks
-:PROPERTIES:
-:CUSTOM_ID: babel
-:END:
-
-This activates a number of widely used languages, you are encouraged
-to activate more languages using the customize interface for the
-`=org-babel-load-languages=' variable, or with an elisp form like the
-one below.  The customize interface of `=org-babel-load-languages='
-contains an up to date list of the currently supported languages.
-
-#+begin_src emacs-lisp :tangle no
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (sh . t)))
-#+end_src
-
-You are encouraged to add the following to your personal configuration
-although it is not added by default as a security precaution.
-
-#+begin_src emacs-lisp :tangle no
-  ;;(setq org-confirm-babel-evaluate nil)
-#+end_src
-
-** Code block fontification
-:PROPERTIES:
-:CUSTOM_ID: code-block-fontification
-:END:
-
-The following displays the contents of code blocks in Org-mode files
-using the major-mode of the code.  It also changes the behavior of
-=TAB= to as if it were used in the appropriate major mode.  This means
-that reading and editing code form inside of your Org-mode files is
-much more like reading and editing of code using its major mode.
-
-#+begin_src emacs-lisp
-  (setq org-src-fontify-natively t)
-  (setq org-src-tab-acts-natively t)
-#+end_src
-
-** The Library of Babel
-:PROPERTIES:
-:CUSTOM_ID: library-of-babel
-:END:
-
-The library of babel contains makes many useful functions available
-for use by code blocks in *any* emacs file.  See the actual
-=library-of-babel.org= (located in the Org-mode =contrib/babel=
-directory) file for information on the functions, and see
-[[http://orgmode.org/worg/org-contrib/babel/intro.php#library-of-babel][worg:library-of-babel]] for more usage information.
-
-Code blocks can be loaded into the library of babel from any Org-mode
-file using the `org-babel-lob-ingest' function.
-
-This file is used to publish the starter kit documentation to =.html=
-in the =doc/= directory.
-
-This code defines the =starter-kit-project= which is used to publish
-the documentation for the Starter Kit to html.
-
-#+begin_src emacs-lisp :results silent
-  ;; (unless (boundp 'org-publish-project-alist)
-  ;;   (setq org-publish-project-alist nil))
-
-  ;; (let* ((this-dir (file-name-directory (or load-file-name buffer-file-name)))
-  ;;        (org-export-htmlize-output-type 'css)
-  ;;        (load-path (cons (expand-file-name "elpa" this-dir) load-path))
-  ;;        (package-archives '(("original"    . "http://tromey.com/elpa/"))))
-  ;;   ;; load up htmlize
-  ;;   (package-initialize)
-  ;;   (let ((package 'htmlize))
-  ;;     (unless (or (member package package-activated-list)
-  ;;                 (functionp package))
-  ;;       (package-install package)))
-  ;;   (require 'htmlize)
-  ;;   (org-export-htmlize-generate-css)
-  ;;   ;; define the org-publish-project for the starter kit
-  ;;   (add-to-list
-  ;;    'org-publish-project-alist
-  ;;    `("starter-kit-documentation"
-  ;;      :base-directory ,this-dir
-  ;;      :base-extension "org"
-  ;;      ;; :style "<link rel=\"stylesheet\" href=\"emacs.css\" type=\"text/css\"/>
-  ;;      ;;         <style type=\"text/css\">
-  ;;      ;;           pre{background:#232323; color:#E6E1DC; padding:1em 1em 0 1em;}
-  ;;      ;;           code{font-size:10pt; color:#353535;}
-  ;;      ;;          .outline-text-2{margin-left: 1em;}
-  ;;      ;;          .outline-text-3{margin-left: 2em;}
-  ;;      ;;          .outline-text-3{margin-left: 3em;}
-  ;;      ;;        </style>"
-  ;;      :publishing-directory ,(expand-file-name "doc" this-dir)
-  ;;      :index-filename "starter-kit.org"
-  ;;      :html-postamble nil))
-  ;;   ;; publish the starter kit
-  ;;   (org-publish-project "starter-kit-documentation" 'force)
-  ;;   ;; copy starter-kit.html to index.html
-  ;;   (copy-file (expand-file-name "starter-kit.html" (expand-file-name "doc" this-dir))
-  ;;              (expand-file-name "index.html" (expand-file-name "doc" this-dir))))
-
-#+end_src
-
-** Published Projects
-
-#+begin_src emacs-lisp
-  (setq org-publish-project-alist
-        '(("org-via"
-           ;; Path to your org files.
-           :base-directory "~/Sites/jeremiahvia.com/_org/"
-           :base-extension "org"
-           :exclude "md\\|markdown"
-
-           ;; Path to your Jekyll project.
-           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
-           :recursive t
-           :publishing-function org-publish-org-to-html
-           :headline-levels 4
-           :html-extension "html"
-           :body-only t ;; Only export section between <body> </body>
-           )
-
-          ("org-static-via"
-           :base-directory "~/Sites/jeremiahvia.com/_org/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php\\|ico"
-           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
-           :recursive t
-           :publishing-function org-publish-attachment
-           )
-
-          ;; Publish everything
-          ("via" :components ("org-via" "org-static-via"))))
-
+;;(setq auto-mode-alist
+;; (cons '("\\.ml\\w?" . tuareg-mode)
+;;        auto-mode-alist))
+;;(autoload 'tuareg-mode "tuareg"
+;;  "Major mode for editing Caml code" t)
+;;(autoload 'camldebug "camldebug"
+;;  "Run the Caml debugger" t)
+;;(add-hook 'tuareg-mode-hook  '(lambda ()
+;;                                (define-key tuareg-mode-map "\M-q"
+;;                                  'tuareg-indent-phrase)
+;;                                (define-key tuareg-mode-map "\C-c \C-i"
+;;                                  'caml-types-show-ident)
+;;                                (define-key tuareg-mode-map [f4] 'goto-line)
+;;                                (define-key tuareg-mode-map [f5] 'compile)
+;;                                (define-key tuareg-mode-map [f6] 'recompile)
+;;                                (define-key tuareg-mode-map [f7] 'next-error)
+;;                                (auto-fill-mode 1)
+;;                                (setq tuareg-sym-lock-keywords nil)))
+;;(setq column-number-mode t)
+;;(setq mouse-wheel-follow-mouse t)
+;;(setq standard-indent 2)
+;;(transient-mark-mode 1)
+;;(setq visible-bell t)
+;;(setq show-paren-face 'modeline)
+;;(setq global-font-lock-mode t)
+;;(setq global-auto-revert-mode t)t)
 #+end_src
 * Python
 
@@ -1370,9 +1442,9 @@ supplied by the Python distribution itself.
 If an =ipython= executable is on the path, then assume that IPython is
 the preferred method python evaluation.
 #+begin_src emacs-lisp
-  (when (executable-find "ipython")
-    (require 'ipython)
-    (setq org-babel-python-mode 'python-mode))
+  ;;(when (executable-find "ipython")
+  ;;  (require 'ipython)
+  ;;  (setq org-babel-python-mode 'python-mode))
 #+end_src
 
 ** Use Cython mode
@@ -1577,6 +1649,9 @@ to use this file:
 Where your mail will be saved locally default value will be =~/gmail=.
 #+begin_src emacs-lisp
   (require 'gnus)
+  (setq user-full-name "Jeremiah M. Via")
+  (setq user-mail-address "jeremiah.via@gmail.com")
+
   (setq nnml-directory "~/.gmail")
   (setq message-directory "~/.gmail")
 #+end_src
@@ -1584,12 +1659,12 @@ Where your mail will be saved locally default value will be =~/gmail=.
 All Gmail groups will be ignored by the default value of
 =gnus-ignored-newsgroups=, so let's change that default value.
 #+begin_src emacs-lisp
-  (setq gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\”]\”[#’()]")
+  (setq gnus-ignored-newsgroups "^to\\.\\|^[0-9. ]+\\( \\|$\\)\\|^[\”]\”[#'()]")
 #+end_src
 
 Setup some default subscriptions
 #+begin_src emacs-lisp
-  (setq gnus-default-subscribed-newsgroups '("INBOX" "Comp/Robot/ROS" "Comp/Robot/robotics-worldwide"))
+  (setq gnus-default-subscribed-newsgroups '("INBOX" "Comp/Robot/ROS" "Comp/Robot/robotics-worldwide" "Bham/RobotClub"))
 #+end_src
 
 *** Getting mail
@@ -1597,11 +1672,17 @@ Setup some default subscriptions
 Set Gmail as the primary source for incoming mail (Gnus can aggregate
 many email and/or newsgroup sources).
 #+begin_src emacs-lisp
-   (setq gnus-select-method
-         '(nnimap "gmail"
-                  (nnimap-address "imap.gmail.com")
-                  (nnimap-server-port 993)
-                  (nnimap-stream ssl)))
+    (setq gnus-select-method
+          '(nnimap "gmail"
+                   (nnimap-address "imap.gmail.com")
+                   (nnimap-server-port 993)
+                   (nnimap-stream ssl)))
+  (setq gnus-asynchronous t)
+  ;;  (setq gnus-secondary-select-methods
+  ;;        '((nnimap "socs"
+  ;;                  (nnimap-address "mailhost.cs.bham.ac.uk")
+  ;;                  (nnimap-server-port 993)
+  ;;                  (nnimap-stream ssl))))
 #+end_src
 
 Place a line like the following in =~/.authinfo=
@@ -1642,6 +1723,10 @@ you can add the following line to your =~/.authinfo=.
   machine smtp.gmail.com login your-name@gmail.com your-password secret port 587
 #+end_src
 
+** org-contacts
+
+Using org-mode to manage my contacts.
+
 ** Customization
 :PROPERTIES:
 :CUSTOM_ID: customization
@@ -1660,21 +1745,25 @@ which is very useful for keeping all of your contacts organized for
 use with gnus.
 
 #+begin_src emacs-lisp
-    ;;; bbdb
+        ;;; bbdb
   (add-to-list 'load-path (concat starter-kit-dir "src/bbdb-2.35/lisp"))
   (add-to-list 'Info-default-directory-list (concat starter-kit-dir "src/bbdb-2.35/texinfo/bbdb.info"))
   (require 'bbdb)
   (require 'bbdb-autoloads)
+
   (bbdb-initialize 'gnus 'message)
-  (setq
-   bbdb-file "~/.bbdb"
-   bbdb-offer-save 'auto
-   bbdb-notice-auto-save-file t
-   bbdb-expand-mail-aliases t
-   bbdb-canonicalize-redundant-nets-p t
-   bbdb-always-add-addresses t
-   bbdb-complete-name-allow-cycling t
-   )
+  (bbdb-insinuate-gnus)
+  (bbdb-insinuate-message)
+
+  (setq  bbdb-file "~/.bbdb"
+         bbdb-offer-save 'auto
+         bbdb-notice-auto-save-file t
+         bbdb-expand-mail-aliases t
+         bbdb-canonicalize-redundant-nets-p t
+         bbdb-always-add-addresses t
+         bbdb-complete-name-allow-cycling t
+         bbdb/mail-auto-create-p t
+         bbdb-use-pop-up t)
 #+end_src
 
 *** More attractive Summary View
@@ -1710,6 +1799,26 @@ Thanks to Dan Davison.
 #+end_src
 
 * ERC
+
+Channels to automatically join
+#+begin_src emacs-lisp
+  (setq erc-autojoin-channels-alist
+        '(("freenode.net" "#cor-lab" "#barc" "#org-mode" "#emacs" "#physics" "#math" "#latex" "#robotics")
+          ("irc.oftc.net" "#ros")))
+#+end_src
+
+Servers to connect to
+#+begin_src emacs-lisp
+  (defun start-irc ()
+    "Connect to IRC."
+    (interactive)
+    (when (y-or-n-p "Connect to IRC?")
+      (erc :server "irc.freenode.net" :port 6667 :nick "jvia" :password "u~BN7`Wa~Jzsv(Cy" :full-name "Jeremiah Via")
+      (erc :server "irc.oftc.net" :port 6667 :nick "jvia" :full-name "Jeremiah Via")))
+
+
+#+end_src
+
 * System Specific
 ** OSX
 *** Add the OSX paths
@@ -1737,6 +1846,9 @@ Thanks to Dan Davison.
 *** Miscellaneous
 
 #+begin_src emacs-lisp
+  (when (eq aquamacs-version "3.x" )
+    (setq tabbar-mode -1))
+
   (when (eq system-type 'darwin)
     ;; allow pressing hash on osx
     (global-set-key (kbd "M-3") "#")
@@ -1745,6 +1857,17 @@ Thanks to Dan Davison.
     ;; may as well use it
     (setq menu-bar-mode 1))
 #+end_src
+** Ubuntu
+
+#+begin_src emacs-lisp
+  (when (eq system-type 'gnu/linux)
+    (add-to-list 'load-path "/opt/ros/electric/ros/tools/rosemacs")
+    (require 'rosemacs)
+    (invoke-rosemacs)
+    (global-set-key "\C-x\C-r" ros-keymap)
+    (setq ros-completion-function 'ido-completing-read))
+#+end_src
+
 * Footnotes
 
 [1] If you already have a directory at =~/.emacs.d= move it out of the
