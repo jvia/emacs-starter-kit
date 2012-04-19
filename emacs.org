@@ -229,13 +229,14 @@ interested in the actual code implementing the starter kit.
             ("gnu"         . "http://elpa.gnu.org/packages/")
             ("marmalade"   . "http://marmalade-repo.org/packages/")))
     (package-initialize)
-
+    
     ;; Bham proxy
-    (setq url-proxy-services '(("http" . "webcache.cs.bham.ac.uk:3128")
-                               ("https" . "webcache.cs.bham.ac.uk:3128")))
-
+    ;;(setq url-proxy-services '(("http" . "webcache.cs.bham.ac.uk:3128")
+    ;;                           ("https" . "webcache.cs.bham.ac.uk:3128")))
+    
     (defvar starter-kit-packages
       '(auctex
+        org
         cdlatex
         color-theme
         color-theme-sanityinc-solarized
@@ -251,7 +252,7 @@ interested in the actual code implementing the starter kit.
         yasnippet-bundle
         yas-jit)
       "Libraries that should be installed by default.")
-
+    
     (unless package-archive-contents
       (package-refresh-contents))
     (dolist (package starter-kit-packages)
@@ -1530,8 +1531,13 @@ Using org-mode to manage my contacts.
 :CUSTOM_ID: customization
 :END:
 
-Once gnus is installed and working, here are some recommended Gnus
-customization.
+Turn on orgtbl and org-struct modes for email. This allows the use of
+orgmode features when composing emails.
+
+#+begin_src emacs-lisp
+  (add-hook 'mail-mode-hook 'turn-on-orgtbl)
+  (add-hook 'mail-mode-hook 'turn-on-orgstruct++)
+#+end_src
 
 ***** BBDB
 :PROPERTIES:
