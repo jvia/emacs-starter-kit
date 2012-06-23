@@ -5,10 +5,7 @@
 #+infojs_opt: view:nil toc:t ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 
 
-* Introduction                                                      :NO_CODE:
-:PROPERTIES:
-:CUSTOM_ID: introduction
-:END:
+* Introduction
 
 This should provide a saner set of defaults than you get normally with
 Emacs. It's intended for beginners, but provides a good elisp
@@ -24,9 +21,7 @@ The main advantage of this Emacs Starter Kit are
 The latest version is at http://github.com/eschulte/emacs24-starter-kit/
 
 *** Learning
-:PROPERTIES:
-:CUSTOM_ID: learning
-:END:
+
 This won't teach you Emacs, but it'll make it easier to get
 comfortable. To access the tutorial, press control-h followed by t
 from within Emacs.
@@ -34,9 +29,6 @@ from within Emacs.
 The [[http://emacswiki.org][Emacs Wiki]] is also very handy.
 
 *** Installation
-:PROPERTIES:
-:CUSTOM_ID: installation
-:END:
 
 1. Install Emacs version 24 or greater.  Use your package manager if
    you have one and it has an install candidate for Emacs 24,
@@ -480,9 +472,6 @@ well as the =contrib= directory.
   #+end_src
 
 ** Speed keys
-:PROPERTIES:
-:CUSTOM_ID: speed-keys
-:END:
 
 Speed commands enable single-letter commands in Org-mode files when
 the point is at the beginning of a headline, or at the beginning of a
@@ -499,9 +488,6 @@ display a list of the code blocks commands and their related keys.
 #+end_src
 
 ** Code blocks
-:PROPERTIES:
-:CUSTOM_ID: babel
-:END:
 
 This activates a number of widely used languages, you are encouraged
 to activate more languages using the customize interface for the
@@ -526,9 +512,6 @@ although it is not added by default as a security precaution.
 #+end_src
 
 ** Code block fontification
-:PROPERTIES:
-:CUSTOM_ID: code-block-fontification
-:END:
 
 The following displays the contents of code blocks in Org-mode files
 using the major-mode of the code.  It also changes the behavior of
@@ -700,9 +683,6 @@ Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Sc
 [[* Common Lisp][Common Lisp]], and [[* Clojure][Clojure]].
 
 ***** Define keys
-:PROPERTIES:
-:CUSTOM_ID: keys
-:END:
 #+srcname: starter-kit-define-lisp-keys
 #+begin_src emacs-lisp
   (define-key read-expression-map (kbd "TAB") 'lisp-complete-symbol)
@@ -713,9 +693,6 @@ Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Sc
 #+end_src
 
 ***** Paredit
-:PROPERTIES:
-:CUSTOM_ID: paredit
-:END:
 [[http://www.emacswiki.org/emacs/ParEdit][Paredit]] might seem weird at first, but it really makes writing lisp a
 much more comfortable experience.  This is especially useful in
 combination with the sexp movement functions (=C-M-f= forward, =C-M-b=
@@ -745,9 +722,6 @@ back, =C-M-u= up, =C-M-d= down)
 #+end_src
 
 ***** Emacs Lisp
-:PROPERTIES:
-:CUSTOM_ID: emacs-lisp
-:END:
 
 #+begin_src emacs-lisp
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
@@ -770,9 +744,6 @@ back, =C-M-u= up, =C-M-d= down)
 #+end_src
 
 ***** Clojure
-:PROPERTIES:
-:CUSTOM_ID: clojure
-:END:
 
 #+begin_src emacs-lisp
   ;; (require 'clojure-mode)
@@ -880,9 +851,6 @@ pretty \lambda's in clojure
 #+end_src
 
 ***** Scheme
-:PROPERTIES:
-:CUSTOM_ID: scheme
-:END:
 
 #+begin_src emacs-lisp
 (add-hook 'scheme-mode-hook 'run-starter-kit-coding-hook)
@@ -892,9 +860,6 @@ pretty \lambda's in clojure
 #+end_src
 
 ***** Common Lisp
-:PROPERTIES:
-:CUSTOM_ID: common-lisp
-:END:
 
 #+begin_src emacs-lisp
 (add-hook 'lisp-mode-hook 'run-starter-kit-coding-hook)
@@ -904,9 +869,6 @@ pretty \lambda's in clojure
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
 *** Haskell
-:PROPERTIES:
-:results:  silent
-:END:
 
 Support for editing Haskell
 
@@ -974,9 +936,6 @@ Java-script Helpers
 Support for the Python programming language.
 
 ***** Use Python's python-mode.el instead of Emacs' python.el
-:PROPERTIES:
-:CUSTOM_ID: python
-:END:
 Replace the Python mode that comes with Emacs by the Python mode
 supplied by the Python distribution itself.
 #+begin_src emacs-lisp
@@ -986,9 +945,6 @@ supplied by the Python distribution itself.
 #+end_src
 
 ***** Use IPython if =ipython= command is present
-:PROPERTIES:
-:CUSTOM_ID: ipython
-:END:
 If an =ipython= executable is on the path, then assume that IPython is
 the preferred method python evaluation.
 #+begin_src emacs-lisp
@@ -998,9 +954,6 @@ the preferred method python evaluation.
 #+end_src
 
 ***** Use Cython mode
-:PROPERTIES:
-:CUSTOM_ID: cython
-:END:
 #+begin_src emacs-lisp
   ;; (require 'cython-mode)
   ;; (add-to-list 'auto-mode-alist '("\\.pyx\\'" . cython-mode))
@@ -1490,10 +1443,6 @@ Using org-mode to manage my contacts.
 #+end_src
 
 ***** Customization
-:PROPERTIES:
-:CUSTOM_ID: customization
-:END:
-
 Turn on orgtbl and org-struct modes for email. This allows the use of
 orgmode features when composing emails.
 
@@ -1503,9 +1452,6 @@ orgmode features when composing emails.
 #+end_src
 
 ***** BBDB
-:PROPERTIES:
-:CUSTOM_ID: bbdb
-:END:
 
 [[http://bbdb.sourceforge.net/][BBDB]] -- _The Insidious Big Brother Database_ is Emacs' contact manager
 which is very useful for keeping all of your contacts organized for
