@@ -203,12 +203,17 @@ autoloaded on demand since they are likely to be used in every
 session.
 
 #+begin_src emacs-lisp
-    (require 'cl)
-    (require 'saveplace)
-    (require 'ffap)
-    (require 'uniquify)
-    (require 'ansi-color)
-    (require 'recentf)
+  (require 'cl)
+  (require 'saveplace)
+  (require 'ffap)
+  (require 'uniquify)
+  (require 'ansi-color)
+  (require 'recentf)
+#+end_src
+
+Set the proxy (if needed)
+#+begin_src emacs-lisp
+(setq url-proxy-services '( ("http" . "webcache.cs.bham.ac.uk:3128")))
 #+end_src
 
 *** Emacs Lisp Package Manager
@@ -295,7 +300,7 @@ a lambda doesn't already exist in the list.
   (run-hooks 'starter-kit-coding-hook))
 #+end_src
 
-*** COMMENT Key Bindings
+*** Key Bindings
 
 Key Bindings.
 
@@ -324,6 +329,9 @@ Key Bindings.
 #+end_src
 
 ***** Font size
+
+This only seems to work with the standard versions of emacs on OSX,
+not aquamacs. Fortunately, aquamacs has its own key =s-+= and =s--=.
 
 #+begin_src emacs-lisp
   (define-key global-map (kbd "C-+") 'text-scale-increase)
@@ -416,7 +424,7 @@ Rgrep is infinitely useful in multi-file projects.
 *** Registers
 
 Registers allow you to jump to a file or other location quickly. Use
-=C-x r j= followed by the letter of the register (i for =init.el=, s
+=C-x r j= followed by the letter of the register (e for =emacs.org=, s
 for this file) to jump to it.
 
 You should add registers here for the files you edit most often.
@@ -429,7 +437,7 @@ You should add registers here for the files you edit most often.
     (set-register (car r) (cadr r)))
 #+end_src
 
-* COMMENT Org Mode
+* Org Mode
 
 Configuration for the eminently useful [[http://orgmode.org/][Org Mode]].
 
@@ -451,6 +459,42 @@ well as the =contrib= directory.
     (require 'org-install)
   #+end_src
 
+- Load org-modules that we want to use
+#+begin_src emacs-lisp
+   ;; Until I get org-modules working correctly, I will just require all
+   ;; extras:
+   (require 'org-mac-message)
+   (require 'org-mac-link-grabber)
+   (require 'org-mac-iCal)
+   (require 'org-crypt)
+   (require 'org-habit)
+   ;;(require 'org-exp-bibtex)
+   ;;(require 'org-bibtex-extras)
+   ;; (defvar org-modules-to-load
+   ;;   '(org-mac-message
+   ;;     org-mac-iCal
+   ;;     org-mac-link-grabber
+   ;;     org-latex
+   ;;     org-contacts
+   ;;     org-habit))
+   ;; (eval-after-load 'org
+   ;;   (dolist (module org-modules-to-load)
+   ;;     (add-to-list 'org-modules module)))
+  
+  (add-hook 'org-agenda-cleanup-fancy-diary-hook
+           (lambda ()
+             (goto-char (point-min))
+             (save-excursion
+               (while (re-search-forward "^[a-z]" nil t)
+                 (goto-char (match-beginning 0))
+                 (insert "0:00-24:00 ")))
+             (while (re-search-forward "^ [a-z]" nil t)
+               (goto-char (match-beginning 0))
+               (save-excursion
+                 (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
+               (insert (match-string 0)))))
+#+end_src
+
 ** Org-Mode Hook -- Keybindings
 :PROPERTIES:
 :CUSTOM_ID: keybindings
@@ -458,18 +502,23 @@ well as the =contrib= directory.
 
 - Set some keys
   #+begin_src emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (local-set-key "\M-\C-n" 'outline-next-visible-heading)
-              (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
-              (local-set-key "\M-\C-u" 'outline-up-heading)
-              ;; table
-              (local-set-key "\M-\C-w" 'org-table-copy-region)
-              (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
-              (local-set-key "\M-\C-l" 'org-table-sort-lines)
-              ;; display images
-              (local-set-key "\M-I" 'org-toggle-iimage-in-org)))
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (local-set-key "\M-\C-n" 'outline-next-visible-heading)
+                (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
+                (local-set-key "\M-\C-u" 'outline-up-heading)
+                ;; table
+                (local-set-key "\M-\C-w" 'org-table-copy-region)
+                (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
+                (local-set-key "\M-\C-l" 'org-table-sort-lines)
+                ;; display images
+                (local-set-key "\M-I"    'org-toggle-iimage-in-org)))
   #+end_src
+
+- Key for Mac Link grabber
+#+begin_src emacs-lisp
+  ;;(define-key org-mode-map (kbd "C-c g") 'omlg-grab-link)
+#+end_src
 
 ** Speed keys
 
@@ -499,15 +548,16 @@ contains an up to date list of the currently supported languages.
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (sh . t)
-     (latex . t)
-     (ditaa . t)))
+     (gnuplot    . t)
+     (sh         . t)
+     (latex      . t)
+     (ditaa      . t)))
 #+end_src
 
 You are encouraged to add the following to your personal configuration
 although it is not added by default as a security precaution.
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle yes
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
@@ -585,40 +635,9 @@ the documentation for the Starter Kit to html.
 
 #+end_src
 
-** Published Projects
-*** Personal Site
-#+begin_src emacs-lisp
-  (setq org-publish-project-alist
-        '(("org-via"
-           ;; Path to your org files.
-           :base-directory "~/Sites/jeremiahvia.com/_org/"
-           :base-extension "org"
-           :exclude "md\\|markdown"
-
-           ;; Path to your Jekyll project.
-           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
-           :recursive t
-           :publishing-function org-publish-org-to-html
-           :headline-levels 4
-           :html-extension "html"
-           :body-only t ;; Only export section between <body> </body>
-           )
-
-          ("org-static-via"
-           :base-directory "~/Sites/jeremiahvia.com/_org/"
-           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php\\|ico"
-           :publishing-directory "~/Sites/jeremiahvia.com/jekyll/"
-           :recursive t
-           :publishing-function org-publish-attachment
-           )
-
-          ;; Publish everything
-          ("via" :components ("org-via" "org-static-via"))))
-#+end_src
 ** Research
 
-#+BEGIN_SRC emacs-lisp
-  (require 'org-latex)
+#+begin_src emacs-lisp
   (setq org-export-latex-listings t)
   (add-to-list 'org-export-latex-packages-alist '("" "listings"))
   (add-to-list 'org-export-latex-packages-alist '("" "color"))
@@ -627,26 +646,38 @@ the documentation for the Starter Kit to html.
   (setq reftex-default-bibliography
         (quote
          ("~/Workspace/fyp/docs/dissertation/references.bib")))
-#+END_SRC
+#+end_src
 
 ** Agenda
 
 #+begin_src emacs-lisp
   (setq org-agenda-files '("~/org"
-                          "~/org/tufts"
-                          "~/bham/3/revision.org"))
+                           "~/Worksapce"
+                           "~/Sites/"))
   ;; Disable C-c [ and C-c ] in org-mode
   (add-hook 'org-mode-hook
             (lambda ()
               ;; Undefine C-c [ and C-c ] since this breaks my
               ;; org-agenda files when directories are include It
               ;; expands the files in the directories individually
-              (org-defkey org-mode-map "\C-c["    'undefined)
-              (org-defkey org-mode-map "\C-c]"    'undefined))
-            'append)
+              (org-defkey org-mode-map "\C-c[" 'undefined)
+              (org-defkey org-mode-map "\C-c]" 'undefined)
+              (org-defkey org-mode-map "\C-cg" 'omlg-grab-link)
+            'append))
 #+end_src
 
-** Capture - Refile - Archive
+** Stuck Projects view
+
+#+begin_src emacs-lisp
+  (setq org-stuck-projects
+        '("+project/-MAYBE-DONE" ("NEXT" "TODO" "WAIT") ("@out")
+          "\\<IGNORE\\>"))
+  
+#+end_src
+
+** TODO Capture - Refile - Archive
+
+TODO Make the journal be in the format of a daily word journal.
 
 #+begin_src emacs-lisp
   (setq org-default-notes-file (concat org-directory "~/org/notes.org"))
@@ -658,10 +689,12 @@ the documentation for the Starter Kit to html.
            "* %?\nEntered on %U\n  %i\n  %a")))
 #+end_src
 
-** iCal Integration
+** TODO iCal Integration
 
-#+BEGIN_SRC emacs-lisp
-  (require 'org-mac-iCal)
+Need to make this format my entries better. It currently does not
+include the date nor the person's birthday.
+
+#+begin_src emacs-lisp
   (setq org-agenda-include-diary t)
   (add-hook 'org-agenda-cleanup-fancy-diary-hook
             (lambda ()
@@ -675,24 +708,40 @@ the documentation for the Starter Kit to html.
                 (save-excursion
                   (re-search-backward "^[0-9]+:[0-9]+-[0-9]+:[0-9]+ " nil t))
                 (insert (match-string 0)))))
-#+END_SRC
+#+end_src
 
-* COMMENT Programming
+** Habits
+
+#+begin_src emacs-lisp
+  (defun via/calc-timespan (ts te)
+    "Calculate the time between two time stamps. To be used in
+     table formulas when I want to calculate the timespan between
+     two events in a non-standard way."
+     (setq s (- (org-float-time (apply 'encode-time (org-parse-time-string te)))
+                (org-float-time (apply 'encode-time (org-parse-time-string ts))))
+           h (floor (/ s 3600))
+           s (- s (* 3600 h))
+           m (floor (/ s 60))
+           s (- s (* 60 s)))
+     (format "%2d:%02d" h m))
+#+end_src
+* Programming
 *** Lisp
 Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Scheme][Scheme]],
 [[* Common Lisp][Common Lisp]], and [[* Clojure][Clojure]].
 
 ***** Define keys
-#+srcname: starter-kit-define-lisp-keys
+
 #+begin_src emacs-lisp
   (define-key read-expression-map (kbd "TAB") 'lisp-complete-symbol)
-  ;; (define-key lisp-mode-shared-map (kbd "C-c l") "lambda")
+  (define-key lisp-mode-shared-map (kbd "C-c l") "lambda")
   (define-key lisp-mode-shared-map (kbd "RET") 'reindent-then-newline-and-indent)
   (define-key lisp-mode-shared-map (kbd "C-\\") 'lisp-complete-symbol)
-  ;; (define-key lisp-mode-shared-map (kbd "C-c v") 'eval-buffer)
+  (define-key lisp-mode-shared-map (kbd "C-c v") 'eval-buffer)
 #+end_src
 
 ***** Paredit
+
 [[http://www.emacswiki.org/emacs/ParEdit][Paredit]] might seem weird at first, but it really makes writing lisp a
 much more comfortable experience.  This is especially useful in
 combination with the sexp movement functions (=C-M-f= forward, =C-M-b=
@@ -706,11 +755,11 @@ back, =C-M-u= up, =C-M-d= down)
     '(define-key paredit-mode-map (kbd ";")   'self-insert-command))
 #+end_src
 
-
 ***** Non-obtrusive parenthesis faces
 :PROPERTIES:
 :CUSTOM_ID: parenthesis-faces
 :END:
+
 #+begin_src emacs-lisp
 (defface starter-kit-paren-face
    '((((class color) (background dark))
@@ -727,7 +776,7 @@ back, =C-M-u= up, =C-M-d= down)
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
 (add-hook 'emacs-lisp-mode-hook 'run-starter-kit-coding-hook)
 (add-hook 'emacs-lisp-mode-hook 'starter-kit-remove-elc-on-save)
-;; (add-hook 'emacs-lisp-mode-hook 'idle-highlight)
+(add-hook 'emacs-lisp-mode-hook 'idle-highlight)
 (add-hook 'emacs-lisp-mode-hook 'turn-on-paredit)
 (define-key emacs-lisp-mode-map (kbd "C-c v") 'eval-buffer)
 
@@ -746,95 +795,95 @@ back, =C-M-u= up, =C-M-d= down)
 ***** Clojure
 
 #+begin_src emacs-lisp
-  ;; (require 'clojure-mode)
-
-  ;; (add-hook 'clojure-mode-hook 'run-starter-kit-coding-hook)
-
-  ;; (font-lock-add-keywords 'clojure-mode
-  ;;                         '(("(\\|)" . 'starter-kit-paren-face)))
-
-  ;; (define-key clojure-mode-map (kbd "C-c v") 'slime-eval-buffer)
-  ;; (define-key clojure-mode-map (kbd "C-c C-v") 'slime-eval-buffer)
-
-  ;; (defface starter-kit-clojure-trace-face
-  ;;    '((((class color) (background dark))
-  ;;       (:foreground "grey50"))
-  ;;      (((class color) (background light))
-  ;;       (:foreground "grey55")))
-  ;;    "Face used to dim parentheses."
-  ;;    :group 'starter-kit-faces)
-
-  ;; (setq starter-kit-clojure-trace-face 'starter-kit-clojure-trace-face)
-
-  ;; ;; This will make relevant lines stand out more in stack traces
-  ;; (defun sldb-font-lock ()
-  ;;   (font-lock-add-keywords nil
-  ;;                           '(("[0-9]+: \\(clojure\.\\(core\\|lang\\).*\\)"
-  ;;                              1 starter-kit-clojure-trace-face)
-  ;;                             ("[0-9]+: \\(java.*\\)"
-  ;;                              1 starter-kit-clojure-trace-face)
-  ;;                             ("[0-9]+: \\(swank.*\\)"
-  ;;                              1 starter-kit-clojure-trace-face)
-  ;;                             ("\\[\\([A-Z]+\\)\\]"
-  ;;                              1 font-lock-function-name-face))))
-
-  ;; (add-hook 'sldb-mode-hook 'sldb-font-lock)
-
-  ;; (defun slime-jump-to-trace (&optional on)
-  ;;   "Jump to the file/line that the current stack trace line references.
-  ;; Only works with files in your project root's src/, not in dependencies."
-  ;;   (interactive)
-  ;;   (save-excursion
-  ;;     (beginning-of-line)
-  ;;     (search-forward-regexp "[0-9]: \\([^$(]+\\).*?\\([0-9]*\\))")
-  ;;     (let ((line (string-to-number (match-string 2)))
-  ;;           (ns-path (split-string (match-string 1) "\\."))
-  ;;           (project-root (locate-dominating-file default-directory "src/")))
-  ;;       (find-file (format "%s/src/%s.clj" project-root
-  ;;                          (mapconcat 'identity ns-path "/")))
-  ;;       (goto-line line))))
-
-  ;; (eval-after-load 'slime
-  ;;   '(progn
-  ;;      (defalias 'sldb-toggle-details 'slime-jump-to-trace)
-  ;;      (defun sldb-prune-initial-frames (frames)
-  ;;        "Show all stack trace lines by default."
-  ;;        frames)))
-
-  ;; (eval-after-load 'find-file-in-project
-  ;;   '(add-to-list 'ffip-patterns "*.clj"))
-
-  ;; ;; You might like this, but it's a bit disorienting at first:
-  ;; (add-hook 'clojure-mode-hook 'turn-on-paredit)
-
-  ;; (defun clojure-project (path)
-  ;;   "Setup classpaths for a clojure project and starts a new SLIME session.
-
-  ;; Kills existing SLIME session, if any."
-  ;;   (interactive (list
-  ;;                 (ido-read-directory-name
-  ;;                  "Project root: "
-  ;;                  (locate-dominating-file default-directory "pom.xml"))))
-  ;;   (when (get-buffer "*inferior-lisp*")
-  ;;     (kill-buffer "*inferior-lisp*"))
-  ;;   (add-to-list 'swank-clojure-extra-vm-args
-  ;;                (format "-Dclojure.compile.path=%s"
-  ;;                        (expand-file-name "target/classes/" path)))
-  ;;   (setq swank-clojure-binary nil
-  ;;         swank-clojure-jar-path (expand-file-name "target/dependency/" path)
-  ;;         swank-clojure-extra-classpaths
-  ;;         (append (mapcar (lambda (d) (expand-file-name d path))
-  ;;                         '("src/" "target/classes/" "test/"))
-  ;;                 (let ((lib (expand-file-name "lib" path)))
-  ;;                   (if (file-exists-p lib)
-  ;;                       (directory-files lib t ".jar$"))))
-  ;;         slime-lisp-implementations
-  ;;         (cons `(clojure ,(swank-clojure-cmd) :init swank-clojure-init)
-  ;;               (remove-if #'(lambda (x) (eq (car x) 'clojure))
-  ;;                          slime-lisp-implementations)))
-  ;;   (save-window-excursion
-  ;;     (slime)))
-
+  (require 'clojure-mode)
+  
+  (add-hook 'clojure-mode-hook 'run-starter-kit-coding-hook)
+  
+  (font-lock-add-keywords 'clojure-mode
+                          '(("(\\|)" . 'starter-kit-paren-face)))
+  
+  (define-key clojure-mode-map (kbd "C-c v") 'slime-eval-buffer)
+  (define-key clojure-mode-map (kbd "C-c C-v") 'slime-eval-buffer)
+  
+  (defface starter-kit-clojure-trace-face
+     '((((class color) (background dark))
+        (:foreground "grey50"))
+       (((class color) (background light))
+        (:foreground "grey55")))
+     "Face used to dim parentheses."
+     :group 'starter-kit-faces)
+  
+  (setq starter-kit-clojure-trace-face 'starter-kit-clojure-trace-face)
+  
+  ;; This will make relevant lines stand out more in stack traces
+  (defun sldb-font-lock ()
+    (font-lock-add-keywords nil
+                            '(("[0-9]+: \\(clojure\.\\(core\\|lang\\).*\\)"
+                               1 starter-kit-clojure-trace-face)
+                              ("[0-9]+: \\(java.*\\)"
+                               1 starter-kit-clojure-trace-face)
+                              ("[0-9]+: \\(swank.*\\)"
+                               1 starter-kit-clojure-trace-face)
+                              ("\\[\\([A-Z]+\\)\\]"
+                               1 font-lock-function-name-face))))
+  
+  (add-hook 'sldb-mode-hook 'sldb-font-lock)
+  
+  (defun slime-jump-to-trace (&optional on)
+    "Jump to the file/line that the current stack trace line references.
+  Only works with files in your project root's src/, not in dependencies."
+    (interactive)
+    (save-excursion
+      (beginning-of-line)
+      (search-forward-regexp "[0-9]: \\([^$(]+\\).*?\\([0-9]*\\))")
+      (let ((line (string-to-number (match-string 2)))
+            (ns-path (split-string (match-string 1) "\\."))
+            (project-root (locate-dominating-file default-directory "src/")))
+        (find-file (format "%s/src/%s.clj" project-root
+                           (mapconcat 'identity ns-path "/")))
+        (goto-line line))))
+  
+  (eval-after-load 'slime
+    '(progn
+       (defalias 'sldb-toggle-details 'slime-jump-to-trace)
+       (defun sldb-prune-initial-frames (frames)
+         "Show all stack trace lines by default."
+         frames)))
+  
+  (eval-after-load 'find-file-in-project
+    '(add-to-list 'ffip-patterns "*.clj"))
+  
+  ;; You might like this, but it's a bit disorienting at first:
+  (add-hook 'clojure-mode-hook 'turn-on-paredit)
+  
+  (defun clojure-project (path)
+    "Setup classpaths for a clojure project and starts a new SLIME session.
+  
+  Kills existing SLIME session, if any."
+    (interactive (list
+                  (ido-read-directory-name
+                   "Project root: "
+                   (locate-dominating-file default-directory "pom.xml"))))
+    (when (get-buffer "*inferior-lisp*")
+      (kill-buffer "*inferior-lisp*"))
+    (add-to-list 'swank-clojure-extra-vm-args
+                 (format "-Dclojure.compile.path=%s"
+                         (expand-file-name "target/classes/" path)))
+    (setq swank-clojure-binary nil
+          swank-clojure-jar-path (expand-file-name "target/dependency/" path)
+          swank-clojure-extra-classpaths
+          (append (mapcar (lambda (d) (expand-file-name d path))
+                          '("src/" "target/classes/" "test/"))
+                  (let ((lib (expand-file-name "lib" path)))
+                    (if (file-exists-p lib)
+                        (directory-files lib t ".jar$"))))
+          slime-lisp-implementations
+          (cons `(clojure ,(swank-clojure-cmd) :init swank-clojure-init)
+                (remove-if #'(lambda (x) (eq (car x) 'clojure))
+                           slime-lisp-implementations)))
+    (save-window-excursion
+      (slime)))
+  
 #+end_src
 
 #+results:
@@ -842,19 +891,19 @@ back, =C-M-u= up, =C-M-d= down)
 
 pretty \lambda's in clojure
 #+begin_src emacs-lisp
-  ;; (eval-after-load 'clojure-mode
-  ;;   '(font-lock-add-keywords
-  ;;     'clojure-mode `(("(\\(fn\\>\\)"
-  ;;                      (0 (progn (compose-region (match-beginning 1)
-  ;;                                                (match-end 1) "ƒ")
-  ;;                                nil))))))
+   (eval-after-load 'clojure-mode
+     '(font-lock-add-keywords
+       'clojure-mode `(("(\\(fn\\>\\)"
+                        (0 (progn (compose-region (match-beginning 1)
+                                                  (match-end 1) "ƒ")
+                                  nil))))))
 #+end_src
 
 ***** Scheme
 
 #+begin_src emacs-lisp
 (add-hook 'scheme-mode-hook 'run-starter-kit-coding-hook)
-;; (add-hook 'scheme-mode-hook 'idle-highlight)
+(add-hook 'scheme-mode-hook 'idle-highlight)
 (font-lock-add-keywords 'scheme-mode
                         '(("(\\|)" . 'starter-kit-paren-face)))
 #+end_src
@@ -863,7 +912,7 @@ pretty \lambda's in clojure
 
 #+begin_src emacs-lisp
 (add-hook 'lisp-mode-hook 'run-starter-kit-coding-hook)
-;; (add-hook 'lisp-mode-hook 'idle-highlight)
+(add-hook 'lisp-mode-hook 'idle-highlight)
 (add-hook 'lisp-mode-hook 'turn-on-paredit)
 (font-lock-add-keywords 'lisp-mode
                         '(("(\\|)" . 'starter-kit-paren-face)))
@@ -874,20 +923,20 @@ Support for editing Haskell
 
 pretty lambdas in Haskell code
 #+begin_src emacs-lisp
-  (defun pretty-lambdas-haskell ()
-    (font-lock-add-keywords
-     nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
-            (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                      ,(make-char 'greek-iso8859-7 107))
-                      nil))))))
+  ;; (defun pretty-lambdas-haskell ()
+  ;;   (font-lock-add-keywords
+  ;;    nil `((,(concat "(?\\(" (regexp-quote "\\") "\\)")
+  ;;           (0 (progn (compose-region (match-beginning 1) (match-end 1)
+  ;;                                     ,(make-char 'greek-iso8859-7 107))
+  ;;                     nil))))))
 #+end_src
 
 
 Haskell mode hook
 #+begin_src emacs-lisp
-  (add-hook 'haskell-mode-hook 'run-starter-kit-coding-hook)
-  (when (window-system)
-    (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
+  ;; (add-hook 'haskell-mode-hook 'run-starter-kit-coding-hook)
+  ;; (when (window-system)
+  ;;   (add-hook 'haskell-mode-hook 'pretty-lambdas-haskell))
 #+end_src
 
 *** Javascript
@@ -895,40 +944,40 @@ Haskell mode hook
 Java-script Helpers
 
 #+begin_src emacs-lisp
-(font-lock-add-keywords
- 'espresso-mode `(("\\(function *\\)("
-                   (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                             "ƒ")
-                             nil)))))
+  ;; (font-lock-add-keywords
+  ;;  'espresso-mode `(("\\(function *\\)("
+  ;;                    (0 (progn (compose-region (match-beginning 1) (match-end 1)
+  ;;                                              "ƒ")
+  ;;                              nil)))))
 #+end_src
 
 #+begin_src emacs-lisp
-(font-lock-add-keywords 'espresso-mode
-                        '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
-                           1 font-lock-warning-face t)))
+  ;; (font-lock-add-keywords 'espresso-mode
+  ;;                         '(("\\<\\(FIX\\|TODO\\|FIXME\\|HACK\\|REFACTOR\\):"
+  ;;                            1 font-lock-warning-face t)))
 #+end_src
 
 #+begin_src emacs-lisp
-(autoload 'espresso-mode "espresso" "Start espresso-mode" t)
-(add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
-(add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
-(add-hook 'espresso-mode-hook 'moz-minor-mode)
-(add-hook 'espresso-mode-hook 'turn-on-paredit)
-(add-hook 'espresso-mode-hook 'run-starter-kit-coding-hook)
-;; (add-hook 'espresso-mode-hook 'idle-highlight)
-(setq espresso-indent-level 2)
+  ;; (autoload 'espresso-mode "espresso" "Start espresso-mode" t)
+  ;; (add-to-list 'auto-mode-alist '("\\.js$" . espresso-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.json$" . espresso-mode))
+  ;; (add-hook 'espresso-mode-hook 'moz-minor-mode)
+  ;; (add-hook 'espresso-mode-hook 'turn-on-paredit)
+  ;; (add-hook 'espresso-mode-hook 'run-starter-kit-coding-hook)
+  ;; ;; (add-hook 'espresso-mode-hook 'idle-highlight)
+  ;; (setq espresso-indent-level 2)
 #+end_src
 
 #+begin_src emacs-lisp
-(defun starter-kit-pp-json ()
-  "Pretty-print the json object following point."
-  (interactive)
-  (require 'json)
-  (let ((json-object (save-excursion (json-read))))
-    (switch-to-buffer "*json*")
-    (delete-region (point-min) (point-max))
-    (insert (pp json-object))
-    (goto-char (point-min))))
+  ;; (defun starter-kit-pp-json ()
+  ;;   "Pretty-print the json object following point."
+  ;;   (interactive)
+  ;;   (require 'json)
+  ;;   (let ((json-object (save-excursion (json-read))))
+  ;;     (switch-to-buffer "*json*")
+  ;;     (delete-region (point-min) (point-max))
+  ;;     (insert (pp json-object))
+  ;;     (goto-char (point-min)))
 #+end_src
 
 *** Python
@@ -936,8 +985,10 @@ Java-script Helpers
 Support for the Python programming language.
 
 ***** Use Python's python-mode.el instead of Emacs' python.el
+
 Replace the Python mode that comes with Emacs by the Python mode
 supplied by the Python distribution itself.
+
 #+begin_src emacs-lisp
 (require 'python-mode)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
@@ -945,8 +996,10 @@ supplied by the Python distribution itself.
 #+end_src
 
 ***** Use IPython if =ipython= command is present
+
 If an =ipython= executable is on the path, then assume that IPython is
 the preferred method python evaluation.
+
 #+begin_src emacs-lisp
   ;;(when (executable-find "ipython")
   ;;  (require 'ipython)
@@ -954,6 +1007,7 @@ the preferred method python evaluation.
 #+end_src
 
 ***** Use Cython mode
+
 #+begin_src emacs-lisp
   ;; (require 'cython-mode)
   ;; (add-to-list 'auto-mode-alist '("\\.pyx\\'" . cython-mode))
@@ -1010,12 +1064,12 @@ is pre-populated with some generally applicable aliases.
 
   load the yasnippet bundle
   #+begin_src emacs-lisp
-    ;; (add-to-list 'load-path
-    ;;              (expand-file-name  "yasnippet"
-    ;;                                 (expand-file-name "src"
-    ;;                                                   starter-kit-dir)))
-    ;; (require 'yasnippet)
-    ;; (yas/initialize)
+     (add-to-list 'load-path
+                  (expand-file-name  "yasnippet"
+                                     (expand-file-name "src"
+                                                       starter-kit-dir)))
+     (require 'yasnippet)
+     (yas/initialize)
   #+end_src
 
   load the snippets defined in the =./snippets/= directory
@@ -1039,267 +1093,107 @@ is pre-populated with some generally applicable aliases.
     (add-hook 'org-mode-hook #'yas/org-setup)
   #+end_src
 
-* COMMENT Miscellaneous
+* Communication
+*** Offline IMAP Access
 
-Things that don't fit anywhere else.
+Using Homebrew, we need to install =dovecot=, =offlineimap=, and
+=notmuch=.
 
-*** Color Themes
-Emacs24 has build in support for saving and loading themes.
+#+begin_src sh :tangle ~/.offlineimaprc
+[general]
+ accounts = MyAccount
+ pythonfile = .offlineimap.py
 
-A Theme builder is available at http://elpa.gnu.org/themes/ along with
-a list of pre-built themes at http://elpa.gnu.org/themes/view.html and
-themes are available through ELPA.
+ [Account MyAccount]
+ localrepository = LocalIMAP
+ remoterepository = RemoteIMAP
+ # autorefresh = 5
+ # postsynchook = notmuch new
 
-Downloaded themes may be saved to the =themes/= directory in the base
-of the starter kit which ignored by git.  Once downloaded and
-evaluated a theme is activated using the =load-theme= function.
+ [Repository LocalIMAP]
+ type = IMAP
+ preauthtunnel = MAIL=maildir:$HOME/Maildir /usr/lib/dovecot/imap
+ holdconnectionopen = yes
 
-#+begin_src emacs-lisp
-  (color-theme-sanityinc-solarized-dark)
+ [Repository RemoteIMAP]
+ type = IMAP
+ remotehost = mail.example.com
+ remoteuser = jsmith
+ remotepass = swordfish
+ ssl = yes
+ nametrans = lambda name: re.sub('^INBOX.', '', name)
+ # folderfilter = lambda name: name in [ 'INBOX.important', 'INBOX.work' ]
+ # folderfilter = lambda name: not (name in [ 'INBOX.spam', 'INBOX.commits' ])
+ # holdconnectionopen = yes
+ maxconnections = 3
+ # foldersort = lld_cmp
 #+end_src
 
-*** Window systems
+#+RESULTS:
 
-#+srcname: starter-kit-window-view-stuff
-#+begin_src emacs-lisp
-  (when window-system
-    (setq frame-title-format '(buffer-file-name "%f" ("%b")))
-    (blink-cursor-mode -1))
-
-  (mouse-wheel-mode t)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-  (prefer-coding-system 'utf-8)
-
-  (setq visible-bell t
-        tabbar-mode nil
-        menu-bar-mode t
-        echo-keystrokes 0.1
-        font-lock-maximum-decoration t
-        inhibit-startup-message t
-        transient-mark-mode t
-        color-theme-is-global t
-        delete-by-moving-to-trash t
-        shift-select-mode nil
-        truncate-partial-width-windows nil
-        uniquify-buffer-name-style 'forward
-        whitespace-style '(trailing lines space-before-tab
-                                    indentation space-after-tab)
-        whitespace-line-column 100
-        ediff-window-setup-function 'ediff-setup-windows-plain
-        oddmuse-directory (concat starter-kit-dir "oddmuse")
-        xterm-mouse-mode t
-        save-place-file (concat starter-kit-dir "places"))
+#+begin_src python :tangle ~/.offlineimap.py
+  # Propagate gnus-expire flag
+   from offlineimap import imaputil
+  
+   def lld_flagsimap2maildir(flagstring):
+       flagmap = {'\\seen'     : 'S',
+                  '\\answered' : 'R',
+                  '\\flagged'  : 'F',
+                  '\\deleted'  : 'T',
+                  '\\draft'    : 'D',
+                  'gnus-expire': 'E'}
+       retval = []
+       imapflaglist = [x.lower() for x in flagstring[1:-1].split()]
+       for imapflag in imapflaglist:
+           if flagmap.has_key(imapflag):
+               retval.append(flagmap[imapflag])
+       retval.sort()
+       return retval
+  
+   def lld_flagsmaildir2imap(list):
+       flagmap = {'S': '\\Seen',
+                  'R': '\\Answered',
+                  'F': '\\Flagged',
+                  'T': '\\Deleted',
+                  'D': '\\Draft',
+                  'E': 'gnus-expire'}
+       retval = []
+       for mdflag in list:
+           if flagmap.has_key(mdflag):
+               retval.append(flagmap[mdflag])
+       retval.sort()
+       return '(' + ' '.join(retval) + ')'
+  
+   imaputil.flagsmaildir2imap = lld_flagsmaildir2imap
+   imaputil.flagsimap2maildir = lld_flagsimap2maildir
+  
+   # Grab some folders first, and archives later
+   high = ['^important$', '^work$']
+   low = ['^archives', '^spam$']
+   import re
+  
+   def lld_cmp(x, y):
+       for r in high:
+           xm = re.search (r, x)
+           ym = re.search (r, y)
+           if xm and ym:
+               return cmp(x, y)
+           elif xm:
+               return -1
+           elif ym:
+               return +1
+       for r in low:
+           xm = re.search (r, x)
+           ym = re.search (r, y)
+           if xm and ym:
+               return cmp(x, y)
+           elif xm:
+               return +1
+           elif ym:
+               return -1
+       return cmp(x, y)
 #+end_src
 
-*** Transparently open compressed files
-
-#+begin_src emacs-lisp
-(auto-compression-mode t)
-#+end_src
-
-*** Save a list of recent files visited.
-
-#+begin_emacs-lisp
-(recentf-mode 1)
-#+end_emacs-lisp
-
-*** Highlight matching parentheses when the point is on them.
-
-#+srcname: starter-kit-match-parens
-#+begin_src emacs-lisp
-(show-paren-mode 1)
-#+end_src
-
-*** ido mode
-
-ido-mode is like magic pixie dust!
-#+srcname: starter-kit-loves-ido-mode
-#+begin_src emacs-lisp
-(when (> emacs-major-version 21)
-  (ido-mode t)
-  (setq ido-enable-prefix nil
-        ido-enable-flex-matching t
-        ido-create-new-buffer 'always
-        ido-use-filename-at-point t
-        ido-max-prospects 10))
-#+end_src
-
-*** Other, spell checking, tabs, imenu and a coding hook
-
-#+begin_src emacs-lisp
-  (set-default 'indent-tabs-mode nil)
-  (set-default 'indicate-empty-lines t)
-  (set-default 'imenu-auto-rescan t)
-
-  (add-hook 'text-mode-hook 'turn-on-auto-fill)
-  (add-hook 'text-mode-hook 'turn-on-flyspell)
-
-  (defvar starter-kit-coding-hook nil
-    "Hook that gets run on activation of any programming mode.")
-
-  (defalias 'yes-or-no-p 'y-or-n-p)
-  ;; Seed the random-number generator
-  (random t)
-#+end_src
-
-*** functions for prettier source code
-
-#+begin_src emacs-lisp
-(defun starter-kit-pretty-lambdas ()
-  (font-lock-add-keywords
-   nil `(("(\\(lambda\\>\\)"
-          (0 (progn (compose-region (match-beginning 1) (match-end 1)
-                                    ,(make-char 'greek-iso8859-7 107))
-                    nil))))))
-#+end_src
-
-*** possible issues/resolutions with flyspell
-Most of the solution came from [[http://www.emacswiki.org/emacs/FlySpell][EmacsWiki-FlySpell]].  Here is one
-possible fix.
-
-***** Emacs set path to aspell
-it's possible aspell isn't in your path
-#+begin_src emacs-lisp :tangle no
-   (setq exec-path (append exec-path '("/opt/local/bin")))
-#+end_src
-
-***** Emacs specify spelling program
-- This didn't work at first, possibly because cocoAspell was
-  building its dictionary.  Now it seems to work fine.
-#+begin_src emacs-lisp :tangle no
-  (setq ispell-program-name "aspell"
-        ispell-dictionary "english"
-        ispell-dictionary-alist
-        (let ((default '("[A-Za-z]" "[^A-Za-z]" "[']" nil
-                         ("-B" "-d" "english" "--dict-dir"
-                          "/Library/Application Support/cocoAspell/aspell6-en-6.0-0")
-                         nil iso-8859-1)))
-          `((nil ,@default)
-            ("english" ,@default))))
-#+end_src
-
-*** Hippie expand: at times perhaps too hip
-
-#+begin_src emacs-lisp
-(delete 'try-expand-line hippie-expand-try-functions-list)
-(delete 'try-expand-list hippie-expand-try-functions-list)
-#+end_src
-
-*** Don't clutter up directories with files~
-
-Rather than saving backup files scattered all over the file system,
-let them live in the =backups/= directory inside of the starter kit.
-#+begin_src emacs-lisp
-(setq backup-directory-alist `(("." . ,(expand-file-name
-                                        (concat starter-kit-dir "backups")))))
-#+end_src
-
-*** Default to unified diffs
-
-#+begin_src emacs-lisp
-(setq diff-switches "-u")
-#+end_src
-
-*** Cosmetics
-
-#+begin_src emacs-lisp
-(eval-after-load 'diff-mode
-  '(progn
-     (set-face-foreground 'diff-added "green4")
-     (set-face-foreground 'diff-removed "red3")))
-
-(eval-after-load 'magit
-  '(progn
-     (set-face-foreground 'magit-diff-add "green3")
-     (set-face-foreground 'magit-diff-del "red3")))
-#+end_src
-*** Window systems -- remove visual cruft                          :visual:
-:PROPERTIES:
-:CUSTOM_ID: window-system
-:END:
-
-#+srcname: starter-kit-window-view-stuff-recommended
-#+begin_src emacs-lisp
-  (when window-system
-    (tooltip-mode -1)
-    (tool-bar-mode -1))
-#+end_src
-
-*** No Menu Bar                                                    :visual:
-
-You really don't need this; trust me.
-#+srcname: starter-kit-no-menu
-#+begin_src emacs-lisp
-  (when (not (eq system-type 'darwin))
-    (menu-bar-mode -1))
-#+end_src
-
-*** Nxhtml -- utilities for we development
-[[http://ourcomments.org/Emacs/nXhtml/doc/nxhtml.html][
-Nxhtml]] is a large package of utilities for web development and for
-embedding multiple major modes in a single buffer.
-
-Nxhtml is not installed in this version of the starter-kit by default,
-for information on installing nxhtml see [[http://www.emacswiki.org/emacs/NxhtmlMode][EmacsWiki-Nxhtml]].
-
-*** Set browser
-
-Set this to whatever browser you use e.g...
-: ;; (setq browse-url-browser-function 'browse-url-firefox)
-: ;; (setq browse-url-browser-function 'browse-default-macosx-browser)
-: ;; (setq browse-url-browser-function 'browse-default-windows-browser)
-: ;; (setq browse-url-browser-function 'browse-default-kde)
-: ;; (setq browse-url-browser-function 'browse-default-epiphany)
-: ;; (setq browse-url-browser-function 'browse-default-w3m)
-: ;; (setq browse-url-browser-function 'browse-url-generic
-: ;;       browse-url-generic-program "~/src/conkeror/conkeror")
-
-*** Associate modes with file extensions
-
-#+begin_src emacs-lisp
-  (add-to-list 'auto-mode-alist '("COMMIT_EDITMSG$" . diff-mode))
-  (add-to-list 'auto-mode-alist '("\\.css$" . css-mode))
-  (require 'yaml-mode)
-  (add-to-list 'auto-mode-alist '("\\.ya?ml$" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("\\.rb$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("Rakefile$" . ruby-mode))
-  (add-to-list 'auto-mode-alist '("\\.js\\(on\\)?$" . js2-mode))
-  (add-to-list 'auto-mode-alist '("\\.xml$" . nxml-mode))
-#+end_src
-
-*** IBuffer stuff
-
-Organize the buffers into groups.
-#+begin_src emacs-lisp
-  (setq ibuffer-saved-filter-groups
-        (quote (("default"
-                 ("erc"   (mode . erc-mode))
-                 ("org"   (mode . org-mode))
-                 ("latex" (or
-                           (mode . latex-mode)
-                           (mode . bibtex-mode)))
-                 ("emacs" (or
-                           (name . "^\\*scratch\\*$")
-                           (name . "^\\*Messages\\*$")))
-                 ("dired" (mode . dired-mode))
-                  ("gnus" (or
-                           (mode . message-mode)
-                           (mode . bbdb-mode)
-                           (mode . mail-mode)
-                           (mode . gnus-group-mode)
-                           (mode . gnus-summary-mode)
-                           (mode . gnus-article-mode)
-                           (name . "^\\.bbdb$")
-                           (name . "^\\.newsrc-dribble")))
-                 ))))
-
-  (add-hook 'ibuffer-mode-hook
-            (lambda ()
-              (ibuffer-switch-to-saved-filter-groups "default")))
-#+end_src
-
-* COMMENT Communication
 *** Gnus
 
 Configuration for the notoriously difficult to configure [[http://www.gnus.org/][Gnus]] email
@@ -1383,11 +1277,6 @@ many email and/or newsgroup sources).
                    (nnimap-server-port 993)
                    (nnimap-stream ssl)))
   (setq gnus-asynchronous t)
-  ;;  (setq gnus-secondary-select-methods
-  ;;        '((nnimap "socs"
-  ;;                  (nnimap-address "mailhost.cs.bham.ac.uk")
-  ;;                  (nnimap-server-port 993)
-  ;;                  (nnimap-stream ssl))))
 #+end_src
 
 Place a line like the following in =~/.authinfo=
@@ -1428,12 +1317,11 @@ you can add the following line to your =~/.authinfo=.
   machine smtp.gmail.com login your-name@gmail.com your-password secret port 587
 #+end_src
 
-***** org-contacts
+***** Org Stuff
 
 Using org-mode to manage my contacts.
 
 #+begin_src emacs-lisp
-  (require 'org-contacts)
   (add-to-list 'org-capture-templates
                '("c" "Contacts" entry (file "~/org/contacts.org")
                  "* %(org-contacts-template-name)
@@ -1442,7 +1330,6 @@ Using org-mode to manage my contacts.
                     :END:      "))
 #+end_src
 
-***** Customization
 Turn on orgtbl and org-struct modes for email. This allows the use of
 orgmode features when composing emails.
 
@@ -1450,36 +1337,6 @@ orgmode features when composing emails.
   (add-hook 'mail-mode-hook 'turn-on-orgtbl)
   (add-hook 'mail-mode-hook 'turn-on-orgstruct++)
 #+end_src
-
-***** BBDB
-
-[[http://bbdb.sourceforge.net/][BBDB]] -- _The Insidious Big Brother Database_ is Emacs' contact manager
-which is very useful for keeping all of your contacts organized for
-use with gnus.
-
-#+begin_comment
-#+begin_src emacs-lisp
-  ;;; bbdb
-  (add-to-list 'load-path (concat starter-kit-dir "src/bbdb-2.35/lisp"))
-  (add-to-list 'Info-default-directory-list (concat starter-kit-dir "src/bbdb-2.35/texinfo/bbdb.info"))
-  (require 'bbdb)
-  (require 'bbdb-autoloads)
-
-  (bbdb-initialize 'gnus 'message)
-  (bbdb-insinuate-gnus)
-  (bbdb-insinuate-message)
-
-  (setq  bbdb-file "~/.bbdb"
-         bbdb-offer-save 'auto
-         bbdb-notice-auto-save-file t
-         bbdb-expand-mail-aliases t
-         bbdb-canonicalize-redundant-nets-p t
-         bbdb-always-add-addresses t
-         bbdb-complete-name-allow-cycling t
-         bbdb/mail-auto-create-p t
-         bbdb-use-pop-up t)
-#+end_src
-#+end_comment
 
 ***** More attractive Summary View
 :PROPERTIES:
@@ -1513,28 +1370,31 @@ Thanks to Dan Davison.
   (setq gnus-summary-display-arrow t)
 #+end_src
 
+***** Miscellaneous settings
+
+Display images inline.
+#+begin_src emacs-lisp
+ ;; (add-to-list 'mm-attachment-override-types "image/.*")
+#+end_src
 *** ERC
 
 Channels to automatically join
 #+begin_src emacs-lisp
-  (setq erc-autojoin-channels-alist
-        '(("freenode.net" "#cor-lab" "#barc" "#org-mode" "#emacs" "#physics" "#math" "#latex" "#robotics")
-          ("irc.oftc.net" "#ros")))
+  ;; (setq erc-autojoin-channels-alist
+  ;;       '(("freenode.net" "#cor-lab" "#barc" "#org-mode" "#emacs" "#physics" "#math" "#latex" "#robotics")
+  ;;         ("irc.oftc.net" "#ros")))
 #+end_src
 
 Servers to connect to
 #+begin_src emacs-lisp
-  (defun start-irc ()
-    "Connect to IRC."
-    (interactive)
-    (when (y-or-n-p "Connect to IRC?")
-      (erc :server "irc.freenode.net" :port 6667 :nick "jvia" :password "u~BN7`Wa~Jzsv(Cy" :full-name "Jeremiah Via")
-      (erc :server "irc.oftc.net" :port 6667 :nick "jvia" :full-name "Jeremiah Via")))
-
-
+  ;; (defun start-irc ()
+  ;;   "Connect to IRC."
+  ;;   (interactive)
+  ;;   (when (y-or-n-p "Connect to IRC?")
+  ;;     (erc :server "irc.freenode.net" :port 6667 :nick "jvia" :password "u~BN7`Wa~Jzsv(Cy" :full-name "Jeremiah Via")
+  ;;     (erc :server "irc.oftc.net" :port 6667 :nick "jvia" :full-name "Jeremiah Via")))
 #+end_src
-
-* COMMENT System Specific
+* System Specific
 *** OSX
 
 - Work around a bug on OS X where system-name is FQDN.
@@ -1569,6 +1429,323 @@ Servers to connect to
             ("PDF Viewer" "open %o")
             ("Google Chrome" "open %o"))))
   #+end_src
+* Miscellaneous
+
+Things that don't fit anywhere else.
+
+*** Color Themes
+
+Emacs24 has build in support for saving and loading themes.
+
+A Theme builder is available at http://elpa.gnu.org/themes/ along with
+a list of pre-built themes at http://elpa.gnu.org/themes/view.html and
+themes are available through ELPA.
+
+Downloaded themes may be saved to the =themes/= directory in the base
+of the starter kit which ignored by git.  Once downloaded and
+evaluated a theme is activated using the =load-theme= function.
+
+#+begin_src emacs-lisp
+  (color-theme-sanityinc-solarized-light)
+#+end_src
+
+*** Window systems
+
+#+srcname: starter-kit-window-view-stuff
+#+begin_src emacs-lisp
+  (when window-system
+    (setq frame-title-format '(buffer-file-name "%f" ("%b")))
+    (blink-cursor-mode -1))
+
+  (mouse-wheel-mode t)
+  (set-terminal-coding-system 'utf-8)
+  (set-keyboard-coding-system 'utf-8)
+  (prefer-coding-system 'utf-8)
+
+  (setq visible-bell t
+        tabbar-mode nil
+        menu-bar-mode t
+        echo-keystrokes 0.1
+        font-lock-maximum-decoration t
+        inhibit-startup-message t
+        transient-mark-mode t
+        color-theme-is-global t
+        delete-by-moving-to-trash t
+        shift-select-mode nil
+        truncate-partial-width-windows nil
+        uniquify-buffer-name-style 'forward
+        whitespace-style '(trailing lines space-before-tab
+                                    indentation space-after-tab)
+        whitespace-line-column 100
+        ediff-window-setup-function 'ediff-setup-windows-plain
+        oddmuse-directory (concat starter-kit-dir "oddmuse")
+        xterm-mouse-mode t
+        save-place-file (concat starter-kit-dir "places"))
+#+end_src
+
+*** Transparently open compressed files
+
+#+begin_src emacs-lisp
+(auto-compression-mode t)
+#+end_src
+
+*** Save a list of recent files visited.
+
+#+begin_emacs-lisp
+(recentf-mode 1)
+#+end_emacs-lisp
+
+*** Highlight matching parentheses when the point is on them.
+
+#+srcname: starter-kit-match-parens
+#+begin_src emacs-lisp
+(show-paren-mode 1)
+#+end_src
+
+*** ido mode
+
+ido-mode is like magic pixie dust!
+
+#+srcname: starter-kit-loves-ido-mode
+#+begin_src emacs-lisp
+  (when (> emacs-major-version 21)
+    (ido-mode t)
+     (setq ido-enable-prefix nil
+          ido-enable-flex-matching t
+           ido-create-new-buffer 'always
+           ido-use-filename-at-point t
+           ido-max-prospects 10))
+#+end_src
+
+*** smex
+
+Smex is better than sex. Almost.
+
+#+begin_src emacs-lisp
+  (smex-initialize)
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "C-M-x") 'smex-major-mode-commands)
+#+end_src
+
+*** Other, spell checking, tabs, imenu and a coding hook
+
+#+begin_src emacs-lisp
+  (set-default 'indent-tabs-mode     nil)
+  (set-default 'indicate-empty-lines t)
+  (set-default 'imenu-auto-rescan    t)
+  
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+  (add-hook 'text-mode-hook 'turn-on-flyspell)
+  
+  (defvar starter-kit-coding-hook nil
+    "Hook that gets run on activation of any programming mode.")
+  
+  (defalias 'yes-or-no-p 'y-or-n-p)
+  ;; Seed the random-number generator
+  (random t)
+#+end_src
+
+*** functions for prettier source code
+
+#+begin_src emacs-lisp
+(defun starter-kit-pretty-lambdas ()
+  (font-lock-add-keywords
+   nil `(("(\\(lambda\\>\\)"
+          (0 (progn (compose-region (match-beginning 1) (match-end 1)
+                                    ,(make-char 'greek-iso8859-7 107))
+                    nil))))))
+#+end_src
+
+*** possible issues/resolutions with flyspell
+
+Most of the solution came from [[http://www.emacswiki.org/emacs/FlySpell][EmacsWiki-FlySpell]].  Here is one
+possible fix.
+
+***** Emacs set path to aspell
+
+It's possible aspell isn't in your path.
+
+#+begin_src emacs-lisp :tangle no
+   (setq exec-path (append exec-path '("/opt/local/bin")))
+#+end_src
+
+***** Emacs specify spelling program
+
+- This didn't work at first, possibly because cocoAspell was
+  building its dictionary.  Now it seems to work fine.
+
+#+begin_src emacs-lisp :tangle no
+  (setq ispell-program-name "aspell"
+        ispell-dictionary "english"
+        ispell-dictionary-alist
+        (let ((default '("[A-Za-z]" "[^A-Za-z]" "[']" nil
+                         ("-B" "-d" "english" "--dict-dir"
+                          "/Library/Application Support/cocoAspell/aspell6-en-6.0-0")
+                         nil iso-8859-1)))
+          `((nil ,@default)
+            ("english" ,@default))))
+#+end_src
+
+*** Hippie expand: at times perhaps too hip
+
+#+begin_src emacs-lisp
+(delete 'try-expand-line hippie-expand-try-functions-list)
+(delete 'try-expand-list hippie-expand-try-functions-list)
+#+end_src
+
+*** Don't clutter up directories with files~
+
+Rather than saving backup files scattered all over the file system,
+let them live in the =backups/= directory inside of the starter
+kit. Do clean that director from time to time.
+
+#+begin_src emacs-lisp
+(setq backup-directory-alist `(("." . ,(expand-file-name
+                                        (concat starter-kit-dir "backups")))))
+#+end_src
+
+*** Default to unified diffs
+
+#+begin_src emacs-lisp
+(setq diff-switches "-u")
+#+end_src
+
+*** TODO Cosmetics
+
+These may be unecessary with the color themes.
+
+#+begin_src emacs-lisp
+  ;; (eval-after-load 'diff-mode
+  ;;   '(progn
+  ;;      (set-face-foreground 'diff-added "green4")
+  ;;      (set-face-foreground 'diff-removed "red3")))
+  
+  ;; (eval-after-load 'magit
+  ;;   '(progn
+  ;;      (set-face-foreground 'magit-diff-add "green3")
+  ;;      (set-face-foreground 'magit-diff-del "red3")))
+#+end_src
+*** Window systems -- remove visual cruft                          :visual:
+:PROPERTIES:
+:CUSTOM_ID: window-system
+:END:
+
+Blegh.
+
+#+begin_src emacs-lisp
+  (when window-system
+    (tooltip-mode -1)
+    (tool-bar-mode -1))
+#+end_src
+
+*** No Menu Bar                                                    :visual:
+
+You really don't need this; trust me. But if you're on OSX, the menu
+bar is mode hidden away so you may as well keep it.
+
+#+srcname: starter-kit-no-menu
+#+begin_src emacs-lisp
+  (when (not (eq system-type 'darwin))
+    (menu-bar-mode -1))
+#+end_src
+
+*** Nxhtml -- utilities for web development
+
+[[http://ourcomments.org/Emacs/nXhtml/doc/nxhtml.html][Nxhtml]] is a large package of utilities for web development and for
+embedding multiple major modes in a single buffer.
+
+Nxhtml is not installed in this version of the starter-kit by default,
+for information on installing nxhtml see [[http://www.emacswiki.org/emacs/NxhtmlMode][EmacsWiki-Nxhtml]].
+
+*** Set browser
+
+Set this to whatever browser you use e.g...
+: ;; (setq browse-url-browser-function 'browse-url-firefox)
+(setq browse-url-browser-function 'browse-default-macosx-browser)
+: ;; (setq browse-url-browser-function 'browse-default-windows-browser)
+: ;; (setq browse-url-browser-function 'browse-default-kde)
+: ;; (setq browse-url-browser-function 'browse-default-epiphany)
+: ;; (setq browse-url-browser-function 'browse-default-w3m)
+: ;; (setq browse-url-browser-function 'browse-url-generic
+: ;;       browse-url-generic-program "~/src/conkeror/conkeror")
+
+*** Associate modes with file extensions
+
+These extensions are common to certain types of files.
+
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("COMMIT_EDITMSG$" . diff-mode))
+  (add-to-list 'auto-mode-alist '("\\.css$"         . css-mode))
+  (require 'yaml-mode)
+  (add-to-list 'auto-mode-alist '("\\.ya?ml$"       . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\.rb$"          . ruby-mode))
+  (add-to-list 'auto-mode-alist '("Rakefile$"       . ruby-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\(on\\)?$" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.xml$"         . nxml-mode))
+#+end_src
+
+*** IBuffer stuff
+
+Organize the buffers into groups.
+#+begin_src emacs-lisp
+  (setq ibuffer-saved-filter-groups
+        (quote (("default"
+                 ("erc"   (mode . erc-mode))
+                 ("org"   (mode . org-mode))
+                 ("latex" (or
+                           (mode . latex-mode)
+                           (mode . bibtex-mode)))
+                 ("emacs" (or
+                           (name . "^\\*scratch\\*$")
+                           (name . "^\\*Messages\\*$")))
+                 ("dired" (mode . dired-mode))
+                  ("gnus" (or
+                           (mode . message-mode)
+                           (mode . mail-mode)
+                           (mode . gnus-group-mode)
+                           (mode . gnus-summary-mode)
+                           (mode . gnus-article-mode)
+                           (name . "^\\.newsrc-dribble")))))))
+
+  (add-hook 'ibuffer-mode-hook
+            (lambda ()
+              (ibuffer-switch-to-saved-filter-groups "default")))
+#+end_src
+
+* Published Projects
+*** Personal Site
+
+#+begin_src emacs-lisp
+  (setq org-publish-project-alist
+        '(("jeremiahvia.com"
+           ;; Path to your org files.
+           :base-directory "~/Sites/jeremiahvia.com/org"
+           :base-extension "org"
+           :exclude "README.org"
+           :publishing-directory "~/Sites/jeremiahvia.com/public_html/"
+           :exclude "html"
+           :recursive t
+           :publishing-function org-publish-org-to-html
+           :headline-levels 3
+           :html-extension "html"
+           :auto-sitemap t
+           :style "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/org-manual.css\" />"
+           :html-preamble nil
+           :html-postamble 
+           "<span class=\"contact\">jeremiah.via@gmail.com</span>
+            <span class=\"contact\"><a href=\"http://github.com/jvia/\">github.com/jvia</a></span>"
+           :section-numbers nil
+           :table-of-contents nil
+           :style-include-default nil)
+          ("jeremiahvia.com-static"
+           :base-directory "~/Sites/jeremiahvia.com/org"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php\\|ico\\|html"
+           :publishing-directory "~/Sites/jeremiahvia.com/public_html"
+           :recursive t
+           :publishing-function org-publish-attachment)
+          ;; Publish everything
+          ("website" :components ("jeremiahvia.com" "jeremiahvia.com-static"))))
+#+end_src
 
 * Footnotes
 
