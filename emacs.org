@@ -213,41 +213,42 @@ session.
 
 Set the proxy (if needed)
 #+begin_src emacs-lisp
-(setq url-proxy-services '( ("http" . "webcache.cs.bham.ac.uk:3128")))
+(setq url-proxy-services '())
+  ;;(setq url-proxy-services '( ("http" . "webcache.cs.bham.ac.uk:3128")))
 #+end_src
 
 *** Emacs Lisp Package Manager
 
 #+begin_src emacs-lisp
-    (setq package-archives
-          '(("original"    . "http://tromey.com/elpa/")
-            ("gnu"         . "http://elpa.gnu.org/packages/")
-            ("marmalade"   . "http://marmalade-repo.org/packages/")))
-    (package-initialize)
-
-    (defvar starter-kit-packages
-      '(auctex
-        cdlatex
-        color-theme
-        color-theme-sanityinc-solarized
-        ctags
-        htmlize
-        gnuplot
-        idle-highlight
-        markdown-mode
-        python-mode
-        synonyms
-        yaml-mode
-        yasnippet
-        yasnippet-bundle
-        yas-jit)
-      "Libraries that should be installed by default.")
-
-    (unless package-archive-contents
-      (package-refresh-contents))
-    (dolist (package starter-kit-packages)
-      (unless (package-installed-p package)
-        (package-install package)))
+  (setq package-archives
+        '(("original"    . "http://tromey.com/elpa/")
+          ("gnu"         . "http://elpa.gnu.org/packages/")
+          ("marmalade"   . "http://marmalade-repo.org/packages/")))
+  (package-initialize)
+  
+  (defvar starter-kit-packages
+    '(auctex
+      cdlatex
+      color-theme
+      color-theme-sanityinc-solarized
+      ctags
+      htmlize
+      gnuplot
+      idle-highlight
+      markdown-mode
+      python-mode
+      synonyms
+      yaml-mode
+      yasnippet
+      yasnippet-bundle
+      yas-jit)
+    "Libraries that should be installed by default.")
+  
+  (unless package-archive-contents
+    (package-refresh-contents))
+  (dolist (package starter-kit-packages)
+    (unless (package-installed-p package)
+      (package-install package)))
 #+end_src
 
 *** The starter-kit-coding-hook:
@@ -468,8 +469,8 @@ well as the =contrib= directory.
    (require 'org-mac-iCal)
    (require 'org-crypt)
    (require 'org-habit)
-   ;;(require 'org-exp-bibtex)
-   ;;(require 'org-bibtex-extras)
+  ;;(require 'org-exp-bibtex)
+  ;;(require 'org-bibtex-extras)
    ;; (defvar org-modules-to-load
    ;;   '(org-mac-message
    ;;     org-mac-iCal
@@ -551,7 +552,8 @@ contains an up to date list of the currently supported languages.
      (gnuplot    . t)
      (sh         . t)
      (latex      . t)
-     (ditaa      . t)))
+     (ditaa      . t)
+     (haskell    . t)))
 #+end_src
 
 You are encouraged to add the following to your personal configuration
@@ -652,7 +654,7 @@ the documentation for the Starter Kit to html.
 
 #+begin_src emacs-lisp
   (setq org-agenda-files '("~/org"
-                           "~/Worksapce"
+                           "~/Workspace"
                            "~/Sites/"))
   ;; Disable C-c [ and C-c ] in org-mode
   (add-hook 'org-mode-hook
@@ -670,7 +672,7 @@ the documentation for the Starter Kit to html.
 
 #+begin_src emacs-lisp
   (setq org-stuck-projects
-        '("+project/-MAYBE-DONE" ("NEXT" "TODO" "WAIT") ("@out")
+        '("+project/-IDEA-DONE" ("NEXT" "TODO" "WAIT") ("@out")
           "\\<IGNORE\\>"))
   
 #+end_src
@@ -695,7 +697,7 @@ Need to make this format my entries better. It currently does not
 include the date nor the person's birthday.
 
 #+begin_src emacs-lisp
-  (setq org-agenda-include-diary t)
+  ;;(setq org-agenda-include-diary nil)
   (add-hook 'org-agenda-cleanup-fancy-diary-hook
             (lambda ()
               (goto-char (point-min))
@@ -725,6 +727,13 @@ include the date nor the person's birthday.
            s (- s (* 60 s)))
      (format "%2d:%02d" h m))
 #+end_src
+** Mobile Org
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-directory "~/Dropbox/org")
+  (setq org-mobile-inbox-for-pull "~/Dropbox/org/flagged.org")
+  (setq org-mobile-directory "~/Dropbox/mobileorg")
+#+END_SRC
 * Programming
 *** Lisp
 Support for editing list dialects including [[* Emacs Lisp][Emacs Lisp]], [[* Scheme][Scheme]],
@@ -1446,7 +1455,7 @@ of the starter kit which ignored by git.  Once downloaded and
 evaluated a theme is activated using the =load-theme= function.
 
 #+begin_src emacs-lisp
-  (color-theme-sanityinc-solarized-light)
+  (color-theme-sanityinc-solarized-dark)
 #+end_src
 
 *** Window systems
