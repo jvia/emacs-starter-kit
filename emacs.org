@@ -434,7 +434,11 @@ You should add registers here for the files you edit most often.
 #+begin_src emacs-lisp :results silent
   (dolist
       (r `((?e (file . ,(concat starter-kit-dir "emacs.org")))
-           (?t (file . "~/org/todo.org"))))
+           (?t (file . "~/org/todo.org"))
+           (?r (file . "~/org/research.org"))
+           (?h (file . "~/org/health.org"))
+           (?u (file . "~/org/tufts.org"))
+           (?g (file . "~/org/gifts.org"))))
     (set-register (car r) (cadr r)))
 #+end_src
 
@@ -469,8 +473,8 @@ well as the =contrib= directory.
    (require 'org-mac-iCal)
    (require 'org-crypt)
    (require 'org-habit)
-  ;;(require 'org-exp-bibtex)
-  ;;(require 'org-bibtex-extras)
+  (require 'org-exp-bibtex)
+  (require 'org-bibtex-extras)
    ;; (defvar org-modules-to-load
    ;;   '(org-mac-message
    ;;     org-mac-iCal
@@ -553,7 +557,8 @@ contains an up to date list of the currently supported languages.
      (sh         . t)
      (latex      . t)
      (ditaa      . t)
-     (haskell    . t)))
+     (haskell    . t)
+     (dot        . t)))
 #+end_src
 
 You are encouraged to add the following to your personal configuration
